@@ -616,7 +616,7 @@ def _cmd_get(args, parser):
 
     if args.json:
         # Only output keys for security - values are never included in JSON output
-        keys_only = dict.fromkeys(secret_data.keys(), "[REDACTED]")
+        keys_only = dict.fromkeys(secret_data, "[REDACTED]")
         print(json.dumps(keys_only, indent=2))
         print("\nNOTE: Secret values are not displayed for security reasons.", file=sys.stderr)
     else:
