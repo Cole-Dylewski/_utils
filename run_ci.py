@@ -148,7 +148,7 @@ def run_tests() -> bool:
 
     cmd = [
         "pytest",
-        "--cov=_utils",
+        "--cov=python/_utils",
         "--cov-report=xml",
         "--cov-report=html",
         "--cov-report=term-missing",
