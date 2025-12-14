@@ -917,12 +917,12 @@ fi"""
             # Log Terraform variables for diagnosis (mask sensitive values)
             logger.info("[TERRAFORM] Terraform variables being passed:")
             for key, value in terraform_vars.items():
-                if "token" in key.lower() or "password" in key.lower() or "secret" in key.lower():
-                    masked_value = (
-                        f"{str(value)[:4]}...{str(value)[-4:]}"
-                        if value and len(str(value)) > 8
-                        else "***"
-                    )
+                # Mask any potentially sensitive values
+                sensitive_keywords = ["token", "password", "secret", "key", "credential", "auth"]
+                is_sensitive = any(keyword in key.lower() for keyword in sensitive_keywords)
+
+                if is_sensitive and value:
+                    masked_value = "[REDACTED]"
                     logger.info(f"[TERRAFORM]   {key} = {masked_value}")
                 else:
                     logger.info(f"[TERRAFORM]   {key} = {value}")

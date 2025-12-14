@@ -108,11 +108,8 @@ def check_tailscale_key(
     if secret:
         logger.info("✓ Tailscale secret found!")
         if "auth_key" in secret:
-            auth_key = secret["auth_key"]
-            # Show first and last few characters for security
-            masked_key = f"{auth_key[:10]}...{auth_key[-10:]}" if len(auth_key) > 20 else "***"
-            logger.info(f"  auth_key: {masked_key} (length: {len(auth_key)})")
-            logger.info(f"  Full key starts with: {auth_key[:15]}")
+            # NOTE: Never log auth_key values, even partially - CodeQL security requirement
+            logger.info("  auth_key: [REDACTED]")
             return True
         logger.warning("  Secret found but 'auth_key' key not present")
         logger.info(f"  Keys in secret: {list(secret.keys())}")

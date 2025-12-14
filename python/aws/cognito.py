@@ -379,7 +379,7 @@ class CognitoHandler:
         """
         try:
             if action == "CREATE":
-                print(f"Creating new user: {username}")
+                logger.info(f"Creating new user: {username}")
 
                 # User attributes
                 user_attributes = [
@@ -407,7 +407,7 @@ class CognitoHandler:
                 print(f"User {username} created successfully.")
 
             elif action == "RESET":
-                print(f"Resetting password for user: {username}")
+                logger.info(f"Resetting password for user: {username}")
 
                 # Reset password (forces user to change at next login)
                 self.cognito_client.admin_set_user_password(
@@ -417,7 +417,7 @@ class CognitoHandler:
                     Permanent=False,  # Forces password reset at login
                 )
 
-                print(
+                logger.info(
                     f"Password reset successfully for user {username}. User must change password at next login."
                 )
 
