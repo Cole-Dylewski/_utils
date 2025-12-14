@@ -64,7 +64,7 @@ class CredentialGenerator:
 
         password = "".join(secrets.choice(charset) for _ in range(length))
 
-        logger.debug(f"Generated password of length {length}")
+        logger.debug(f"Generated credential of length {length}")
         return password
 
     @staticmethod
@@ -99,7 +99,7 @@ class CredentialGenerator:
             24
         """
         token = secrets.token_urlsafe(length)
-        logger.debug(f"Generated secret token of length {length}")
+        logger.debug(f"Generated credential token of length {length}")
         return token
 
     @staticmethod

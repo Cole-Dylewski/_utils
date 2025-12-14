@@ -128,7 +128,7 @@ class CognitoHandler:
             logger.exception(f"Not authorized: {e!s}")
             raise HTTPException(status_code=401, detail="Invalid username or password")
         except self.cognito_client.exceptions.PasswordResetRequiredException as e:
-            logger.exception("Password reset required")
+            logger.exception("Credential reset required")
             raise HTTPException(status_code=401, detail="Password reset required")
         except self.cognito_client.exceptions.UserNotConfirmedException as e:
             logger.exception(f"User is not confirmed: {e!s}")
@@ -314,7 +314,7 @@ class CognitoHandler:
                 detail="Too many attempts. Please wait before making another request.",
             )
         except Exception as e:
-            logger.exception("Error confirming password reset")
+            logger.exception("Error confirming credential reset")
             raise HTTPException(status_code=500, detail="Failed to confirm password reset")
 
     def change_password(self, access_token: str, old_password: str, new_password: str) -> dict:
@@ -469,7 +469,7 @@ class CognitoHandler:
             logger.exception(f"User creation failed - Username already exists: {username}")
             raise HTTPException(status_code=409, detail="Username already exists")
         except self.cognito_client.exceptions.InvalidPasswordException as e:
-            logger.exception(f"User creation failed - Invalid password: {username}")
+            logger.exception(f"User creation failed - Invalid credential: {username}")
             raise HTTPException(status_code=400, detail="Invalid password format")
         except Exception as e:
             logger.exception(f"User creation failed for username: {username}, Error: {e!s}")

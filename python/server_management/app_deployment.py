@@ -137,21 +137,21 @@ class AppDeploymentConfig(ABC):
                 if key_name not in self.credentials.api_keys or overwrite_existing:
                     self.credentials.api_keys[key_name] = generator.generate_api_key()
                     generated[cred_name] = self.credentials.api_keys[key_name]
-                    logger.info(f"Generated API key: {key_name}")
+                    logger.info(f"Generated API credential: {key_name}")
             elif cred_name == "jwt_secret":
                 if "jwt_secret" not in self.credentials.secrets or overwrite_existing:
                     self.credentials.secrets["jwt_secret"] = generator.generate_jwt_secret()
                     generated["jwt_secret"] = self.credentials.secrets["jwt_secret"]
-                    logger.info("Generated JWT secret")
+                    logger.info("Generated JWT credential")
             elif cred_name == "encryption_key":
                 if "encryption_key" not in self.credentials.secrets or overwrite_existing:
                     self.credentials.secrets["encryption_key"] = generator.generate_encryption_key()
                     generated["encryption_key"] = self.credentials.secrets["encryption_key"]
-                    logger.info("Generated encryption key")
+                    logger.info("Generated encryption credential")
             elif cred_name not in self.credentials.secrets or overwrite_existing:
                 self.credentials.secrets[cred_name] = generator.generate_secret_token()
                 generated[cred_name] = self.credentials.secrets[cred_name]
-                logger.info(f"Generated secret: {cred_name}")
+                logger.info(f"Generated credential: {cred_name}")
 
         return generated
 
@@ -228,7 +228,7 @@ class AppDeploymentConfig(ABC):
 
             if app_secrets:
                 self.credentials.secrets.update(app_secrets)
-                logger.info(f"Loaded {len(app_secrets)} secrets from Vault")
+                logger.info(f"Loaded {len(app_secrets)} credentials from Vault")
             else:
                 logger.debug(
                     f"No application secrets found at: {vault.base_path}/{secrets_secret_name}"
@@ -241,9 +241,9 @@ class AppDeploymentConfig(ABC):
 
             if api_keys:
                 self.credentials.api_keys.update(api_keys)
-                logger.info(f"Loaded {len(api_keys)} API keys from Vault")
+                logger.info(f"Loaded {len(api_keys)} API credentials from Vault")
 
-            # Load infrastructure secrets (Tailscale auth key, GitHub tokens, etc.)
+            # Load infrastructure credentials (Tailscale auth key, GitHub tokens, etc.)
             # Secret path: infra/* (outside base_path)
             # Create a temporary handler with base_path="infra" to access infra secrets
             from _utils.server_management.vault import VaultHandler
@@ -261,9 +261,9 @@ class AppDeploymentConfig(ABC):
                 # Store in a way that app configs can access
                 if "auth_key" in infra_secrets:
                     self.credentials.secrets["tailscale_auth_key"] = infra_secrets["auth_key"]
-                    logger.info("Loaded Tailscale auth key from Vault at infra/tailscale")
+                    logger.info("Loaded Tailscale auth credential from Vault at infra/tailscale")
                 else:
-                    logger.warning("Tailscale secret found but 'auth_key' key not present")
+                    logger.warning("Tailscale credential found but 'auth_key' not present")
             else:
                 logger.debug("No Tailscale auth key found in Vault at infra/tailscale")
 
@@ -277,7 +277,7 @@ class AppDeploymentConfig(ABC):
                     logger.info("Loaded GitHub credential from Vault at infra/github")
                 if "ssh_key" in github_secrets:
                     self.credentials.secrets["github_ssh_key"] = github_secrets["ssh_key"]
-                    logger.info("Loaded GitHub SSH key from Vault at infra/github")
+                    logger.info("Loaded GitHub SSH credential from Vault at infra/github")
             else:
                 logger.debug("No GitHub credentials found in Vault at infra/github")
 
@@ -300,7 +300,7 @@ class AppDeploymentConfig(ABC):
         :return: True if credentials saved successfully
         """
         if not self.vault_config:
-            logger.debug("Vault not configured, skipping secret save")
+            logger.debug("Vault not configured, skipping credential save")
             return False
 
         try:
@@ -333,13 +333,15 @@ class AppDeploymentConfig(ABC):
                         f"[VAULT] Existing secret keys: {list(existing.keys()) if existing else 'None'}"
                     )
                 else:
-                    logger.info(f"[VAULT] Creating/updating database secret at: {full_vault_path}")
+                    logger.info(
+                        f"[VAULT] Creating/updating database credential at: {full_vault_path}"
+                    )
                     success = vault.create_or_update_secret(
                         database_secret_name, {"password": self.credentials.database_password}
                     )
                     if success:
                         logger.info(
-                            f"[VAULT] Successfully saved database password to: {full_vault_path}"
+                            f"[VAULT] Successfully saved database credential to: {full_vault_path}"
                         )
                         # Verify the secret was saved
                         verification = vault.get_secret(database_secret_name)
@@ -349,7 +351,7 @@ class AppDeploymentConfig(ABC):
                             )
                         else:
                             logger.warning(
-                                f"[VAULT] Verification failed: Secret not found at {full_vault_path} immediately after save"
+                                f"[VAULT] Verification failed: Credential not found at {full_vault_path} immediately after save"
                             )
                         saved_count += 1
                     else:
@@ -361,8 +363,12 @@ class AppDeploymentConfig(ABC):
             if self.credentials.secrets:
                 secrets_secret_name = f"{self.environment.value}/secrets"
                 full_vault_path = f"{vault.base_path}/{secrets_secret_name}"
-                logger.info(f"[VAULT] Preparing to save application secrets to: {full_vault_path}")
-                logger.debug(f"[VAULT] Secrets to save: {list(self.credentials.secrets.keys())}")
+                logger.info(
+                    f"[VAULT] Preparing to save application credentials to: {full_vault_path}"
+                )
+                logger.debug(
+                    f"[VAULT] Credentials to save: {list(self.credentials.secrets.keys())}"
+                )
 
                 existing = vault.get_secret(secrets_secret_name)
                 if existing and not overwrite:
@@ -370,15 +376,15 @@ class AppDeploymentConfig(ABC):
                     merged_secrets = existing.copy()
                     merged_secrets.update(self.credentials.secrets)
                     secrets_to_save = merged_secrets
-                    logger.info(f"[VAULT] Merging with existing secrets at {full_vault_path}")
-                    logger.debug(f"[VAULT] Existing secret keys: {list(existing.keys())}")
+                    logger.info(f"[VAULT] Merging with existing credentials at {full_vault_path}")
+                    logger.debug(f"[VAULT] Existing credential keys: {list(existing.keys())}")
                 else:
                     secrets_to_save = self.credentials.secrets
 
                 success = vault.create_or_update_secret(secrets_secret_name, secrets_to_save)
                 if success:
                     logger.info(
-                        f"[VAULT] Successfully saved {len(secrets_to_save)} secrets to: {full_vault_path}"
+                        f"[VAULT] Successfully saved {len(secrets_to_save)} credentials to: {full_vault_path}"
                     )
                     # Verify the secret was saved
                     verification = vault.get_secret(secrets_secret_name)
@@ -388,11 +394,11 @@ class AppDeploymentConfig(ABC):
                         )
                     else:
                         logger.warning(
-                            f"[VAULT] Verification failed: Secret not found at {full_vault_path} immediately after save"
+                            f"[VAULT] Verification failed: Credential not found at {full_vault_path} immediately after save"
                         )
                     saved_count += 1
                 else:
-                    logger.error(f"[VAULT] Failed to save secrets to: {full_vault_path}")
+                    logger.error(f"[VAULT] Failed to save credentials to: {full_vault_path}")
 
             # Save API keys
             if self.credentials.api_keys:
@@ -416,7 +422,7 @@ class AppDeploymentConfig(ABC):
                     )
                     saved_count += 1
                 else:
-                    logger.error("Failed to save API keys to Vault")
+                    logger.error("Failed to save API credentials to Vault")
 
             # Save infrastructure secrets (Tailscale auth key, etc.) if present
             # Check if tailscale_auth_key is in credentials.secrets
@@ -445,13 +451,13 @@ class AppDeploymentConfig(ABC):
 
                 success = infra_handler.create_or_update_secret("tailscale", secrets_to_save)
                 if success:
-                    logger.info("Saved Tailscale auth key to Vault: infra/tailscale")
+                    logger.info("Saved Tailscale auth credential to Vault: infra/tailscale")
                     saved_count += 1
                 else:
                     logger.error("Failed to save Tailscale auth key to Vault")
 
             if saved_count > 0:
-                logger.info(f"Successfully saved {saved_count} secret group(s) to Vault")
+                logger.info(f"Successfully saved {saved_count} credential group(s) to Vault")
                 return True
             logger.warning("No credentials to save to Vault")
             return False
@@ -933,9 +939,9 @@ fi"""
                 environment = terraform_vars.get("environment", "demo")
                 expected_db_path = f"{vault_base}/{environment}/database"
                 expected_secrets_path = f"{vault_base}/{environment}/secrets"
-                logger.info("[TERRAFORM] Terraform will attempt to read Vault secrets at:")
+                logger.info("[TERRAFORM] Terraform will attempt to read Vault credentials at:")
                 logger.info(f"[TERRAFORM]   Database: {expected_db_path}")
-                logger.info(f"[TERRAFORM]   Secrets: {expected_secrets_path}")
+                logger.info(f"[TERRAFORM]   Credentials: {expected_secrets_path}")
 
                 # Verify secrets exist before Terraform runs
                 if self.config.vault_config:

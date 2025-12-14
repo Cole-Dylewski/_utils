@@ -75,7 +75,7 @@ class Credentials:
     def __post_init__(self) -> None:
         """Validate credentials."""
         if not self.database_password:
-            logger.warning("Database password not provided")
+            logger.warning("Database credential not provided")
 
 
 @dataclass
@@ -136,12 +136,12 @@ class AppDeploymentConfig(ABC):
                 if key_name not in self.credentials.api_keys or overwrite_existing:
                     self.credentials.api_keys[key_name] = generator.generate_api_key()
                     generated[cred_name] = self.credentials.api_keys[key_name]
-                    logger.info(f"Generated API key: {key_name}")
+                    logger.info(f"Generated API credential: {key_name}")
             elif cred_name == "jwt_secret":
                 if "jwt_secret" not in self.credentials.secrets or overwrite_existing:
                     self.credentials.secrets["jwt_secret"] = generator.generate_jwt_secret()
                     generated["jwt_secret"] = self.credentials.secrets["jwt_secret"]
-                    logger.info("Generated JWT secret")
+                    logger.info("Generated JWT credential")
             elif cred_name == "encryption_key":
                 if "encryption_key" not in self.credentials.secrets or overwrite_existing:
                     self.credentials.secrets["encryption_key"] = generator.generate_encryption_key()
@@ -150,7 +150,7 @@ class AppDeploymentConfig(ABC):
             elif cred_name not in self.credentials.secrets or overwrite_existing:
                 self.credentials.secrets[cred_name] = generator.generate_secret_token()
                 generated[cred_name] = self.credentials.secrets[cred_name]
-                logger.info(f"Generated secret: {cred_name}")
+                logger.info(f"Generated credential: {cred_name}")
 
         return generated
 
@@ -186,7 +186,7 @@ class AppDeploymentConfig(ABC):
         OLD METHOD - Vault support removed.
         """
         if not self.vault_config:
-            logger.debug("Vault not configured, skipping secret save")
+            logger.debug("Vault not configured, skipping credential save")
             return False
 
         try:
@@ -219,7 +219,9 @@ class AppDeploymentConfig(ABC):
                         f"[VAULT] Existing secret keys: {list(existing.keys()) if existing else 'None'}"
                     )
                 else:
-                    logger.info(f"[VAULT] Creating/updating database secret at: {full_vault_path}")
+                    logger.info(
+                        f"[VAULT] Creating/updating database credential at: {full_vault_path}"
+                    )
                     success = vault.create_or_update_secret(
                         database_secret_name, {"password": self.credentials.database_password}
                     )
@@ -248,7 +250,9 @@ class AppDeploymentConfig(ABC):
                 secrets_secret_name = f"{self.environment.value}/secrets"
                 full_vault_path = f"{vault.base_path}/{secrets_secret_name}"
                 logger.info(f"[VAULT] Preparing to save application secrets to: {full_vault_path}")
-                logger.debug(f"[VAULT] Secrets to save: {list(self.credentials.secrets.keys())}")
+                logger.debug(
+                    f"[VAULT] Credentials to save: {list(self.credentials.secrets.keys())}"
+                )
 
                 existing = vault.get_secret(secrets_secret_name)
                 if existing and not overwrite:
@@ -257,7 +261,7 @@ class AppDeploymentConfig(ABC):
                     merged_secrets.update(self.credentials.secrets)
                     secrets_to_save = merged_secrets
                     logger.info(f"[VAULT] Merging with existing secrets at {full_vault_path}")
-                    logger.debug(f"[VAULT] Existing secret keys: {list(existing.keys())}")
+                    logger.debug(f"[VAULT] Existing credential keys: {list(existing.keys())}")
                 else:
                     secrets_to_save = self.credentials.secrets
 
@@ -290,7 +294,7 @@ class AppDeploymentConfig(ABC):
                     merged_keys = existing.copy()
                     merged_keys.update(self.credentials.api_keys)
                     keys_to_save = merged_keys
-                    logger.info(f"Merging with existing API keys at {api_keys_secret_name}")
+                    logger.info(f"Merging with existing API credentials at {api_keys_secret_name}")
                 else:
                     keys_to_save = self.credentials.api_keys
 
@@ -816,7 +820,7 @@ fi"""
                 expected_secrets_path = f"{vault_base}/{environment}/secrets"
                 logger.info("[TERRAFORM] Terraform will attempt to read Vault secrets at:")
                 logger.info(f"[TERRAFORM]   Database: {expected_db_path}")
-                logger.info(f"[TERRAFORM]   Secrets: {expected_secrets_path}")
+                logger.info(f"[TERRAFORM]   Credentials: {expected_secrets_path}")
 
                 # Verify secrets exist before Terraform runs
                 if self.config.vault_config:
