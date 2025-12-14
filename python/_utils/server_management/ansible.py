@@ -356,7 +356,8 @@ class AnsibleHandler:
                 pass
             elif not Path(inv_path).is_absolute():
                 # Relative path, prepend remote ansible_dir
-                inv_path = f"{self.remote_ansible_dir}/{inv_path.replace('\\', '/')}"
+                normalized_path = inv_path.replace('\\', '/')
+                inv_path = f"{self.remote_ansible_dir}/{normalized_path}"
             elif str(self.ansible_dir) in inv_path:
                 # Convert local absolute path to remote path
                 try:
@@ -497,7 +498,8 @@ class AnsibleHandler:
                     inv_path = f"{self.remote_ansible_dir}/inventory/hosts.yml"
             elif not Path(inv_path).is_absolute():
                 # Relative path, prepend remote ansible_dir
-                inv_path = f"{self.remote_ansible_dir}/{inv_path.replace('\\', '/')}"
+                normalized_path = inv_path.replace('\\', '/')
+                inv_path = f"{self.remote_ansible_dir}/{normalized_path}"
             else:
                 # Absolute path that's not under ansible_dir, use as-is
                 pass

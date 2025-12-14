@@ -266,7 +266,7 @@ def get_best_data_type(value):
 # %% PANDAS DATAFRAME OPERATIONS        
 
 # gets least inclusive datatype for a given value
-def typeCheck(val):
+def type_check(val):
     dataTypes ={
         'str':(0,str),
         # 'timeStamp': (1,pd._libs.tslibs.timestamps.Timestamp),
@@ -331,7 +331,7 @@ def getColType(col):
     tempCol.infer_objects()
     # print(tempCol.info())
     if not tempCol.empty:
-        dataTypes = set(tempCol.apply(typeCheck))
+        dataTypes = set(tempCol.apply(type_check))
         # print(dataTypes)
         dataTypes = {k:v for k,v in dataTypes}
         # print(col.name, dataTypes)

@@ -47,7 +47,7 @@ def dataframe_size_in_mb(df):
     
     return total_memory_usage_mb
 #%% Data Type Parsing
-def typeCheck(val):
+def type_check(val):
     dataTypes ={
         'str':(0,str),
         # 'timeStamp': (1,pd._libs.tslibs.timestamps.Timestamp),
@@ -112,7 +112,7 @@ def getColType(col):
     tempCol.infer_objects()
     # print(tempCol.info())
     if not tempCol.empty:
-        dataTypes = set(tempCol.apply(typeCheck))
+        dataTypes = set(tempCol.apply(type_check))
         # print(dataTypes)
         dataTypes = {k:v for k,v in dataTypes}
         # print(col.name, dataTypes)

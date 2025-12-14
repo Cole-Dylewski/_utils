@@ -125,10 +125,10 @@ class CodebuildHandler:
             # Get the project details
             response = self.codebuild_client.batch_get_projects(names=[project_name])
             projects = response.get('projects', [])
-            
+
             if not projects:
                 raise ValueError(f"No project found with name: {project_name}")
-            
+
             project = projects[0]
             # print_nested(project)
             # Map the project details to the update-project format
@@ -171,7 +171,7 @@ class CodebuildHandler:
         Args:
             project_name (str): Name of the CodeBuild project.
             kwargs: Field updates as key-value pairs.
-            
+
 
         Returns:
             dict: Response from the CodeBuild update project API.
@@ -199,7 +199,7 @@ class CodebuildHandler:
         except ClientError as e:
             logger.error(f"Failed to update project {project_name}: {e}")
             raise
-        
+
     def update_codebuild_project(
         self,
         project_name,

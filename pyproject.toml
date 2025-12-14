@@ -58,6 +58,7 @@ dev = [
   "coverage>=7.3.0",
   "build>=1.0.0",
   "twine>=4.0.0",
+  "hvac>=1.0.0",
 ]
 
 [project.urls]

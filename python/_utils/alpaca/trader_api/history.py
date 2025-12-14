@@ -45,7 +45,7 @@ def get_barset(api_key, api_secret, base_url, api_version, symbols, timeframe, s
         'page_token': page_token
     }
 
-        try:
+    try:
             response = requests.get(url, headers=headers, params=params)
             print(response.headers)
             if response.status_code == 200:
