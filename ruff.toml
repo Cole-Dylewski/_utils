@@ -71,26 +71,26 @@ fixable = ["ALL"]
 unfixable = []
 
 # Per-file ignores
-[tool.ruff.per-file-ignores]
+[per-file-ignores]
 "__init__.py" = ["F401"]  # Allow unused imports in __init__.py
 "tests/**/*.py" = ["ARG", "S101"]  # Allow unused arguments and assert in tests
 
 # isort configuration
-[tool.ruff.isort]
+[isort]
 known-first-party = ["_utils"]
 force-sort-within-sections = true
 split-on-trailing-comma = true
 
 # pyupgrade configuration
-[tool.ruff.pyupgrade]
+[pyupgrade]
 keep-runtime-typing = true
 
 # pydocstyle configuration
-[tool.ruff.pydocstyle]
+[pydocstyle]
 convention = "google"
 
 # Line length
-[tool.ruff.format]
+[format]
 quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
