@@ -1,13 +1,24 @@
 import logging
-import requests
-import pandas as pd
-from datetime import datetime
 import time
+from datetime import datetime
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+import pandas as pd
+import requests
 
-from _utils.alpaca.trader_api import accounts, assets, orders, portfolio, watchlists, calendar, clock, crypto, history
-from _utils.alpaca.trader_api import data
+from _utils.alpaca.trader_api import (
+    accounts,
+    assets,
+    calendar,
+    clock,
+    crypto,
+    data,
+    history,
+    orders,
+    portfolio,
+    watchlists,
+)
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 class TraderClient:
     def __init__(self, api_key, api_secret, base_url=r'https://paper-api.alpaca.markets', api_version='v2', premium=False, printVerbose=False):
