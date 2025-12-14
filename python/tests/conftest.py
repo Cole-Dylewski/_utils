@@ -21,12 +21,17 @@ def mock_aws_credentials() -> dict[str, str]:
 @pytest.fixture
 def mock_boto3_client(monkeypatch: pytest.MonkeyPatch) -> Mock:
     """Mock boto3 client for AWS service tests."""
+    try:
+        import boto3
+    except ImportError:
+        pytest.skip("boto3 not installed - skipping boto3 mock fixture")
+
     mock_client = MagicMock()
 
-    def mock_boto3_client(service_name: str, **kwargs: Any) -> Mock:
+    def mock_boto3_client_func(service_name: str, **kwargs: Any) -> Mock:
         return mock_client
 
-    monkeypatch.setattr("boto3.client", mock_boto3_client)
+    monkeypatch.setattr("boto3.client", mock_boto3_client_func)
     return mock_client
 
 
