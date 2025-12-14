@@ -1,0 +1,7 @@
+# FastAPI dependencies
+# Install with: pip install -r requirements-fastapi.txt
+# Or use: pip install -e ".[fastapi]"
+
+fastapi>=0.110
+pydantic>=2.0
+uvicorn>=0.23

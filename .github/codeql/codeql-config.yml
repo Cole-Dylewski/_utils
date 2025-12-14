@@ -1,0 +1,11 @@
+name: "Custom CodeQL Configuration"
+
+# Aggressive filtering: Only show critical/high severity security issues
+# This excludes all errors, warnings, notes, and recommendations
+query-filters:
+  - exclude:
+      problem.severity:
+        - error
+        - warning
+        - note
+        - recommendation

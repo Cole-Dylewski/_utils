@@ -1,0 +1,175 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "utils"
+version = "0.1.0"
+description = "Shared utilities for Django, FastAPI, Alpaca, AWS, data, and ML."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Cole Dylewski" }
+]
+keywords = ["utilities", "fastapi", "aws", "alpaca", "data", "ml", "snowflake"]
+# keep base install minimal; prefer extras below
+dependencies = []
+
+# opt-in feature groups so you can install only what a given project needs
+[project.optional-dependencies]
+alpaca = [
+  "alpaca-trade-api>=3.1.0",
+  "pandas>=2.0",
+]
+aws = [
+  "boto3>=1.28",
+  "botocore>=1.31",
+]
+db = [
+  "SQLAlchemy>=2.0",
+  "psycopg[binary]>=3.1",
+  "asyncpg"
+]
+fastapi = [
+  "fastapi>=0.110",
+  "pydantic>=2.0",
+  "uvicorn>=0.23",
+]
+ml = [
+  "numpy>=1.26",
+  "pandas>=2.0",
+  "scikit-learn>=1.4",
+]
+tableau = [
+  "tableauserverclient>=0.26"
+]
+dev = [
+  "pytest>=7.4.0",
+  "pytest-cov>=4.1.0",
+  "pytest-asyncio>=0.21.0",
+  "pytest-mock>=3.12.0",
+  "pytest-timeout>=2.2.0",
+  "ruff>=0.1.0",
+  "mypy>=1.7.0",
+  "pre-commit>=3.5.0",
+  "safety>=2.3.0",
+  "bandit>=1.7.0",
+  "coverage>=7.3.0",
+  "build>=1.0.0",
+  "twine>=4.0.0",
+  "hvac>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Cole-Dylewski/_utils"
+
+[tool.setuptools.packages.find]
+where = ["python"]
+include = ["_utils*"]
+namespaces = false
+
+[tool.pytest.ini_options]
+testpaths = ["python/tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+  "-v",
+  "--strict-markers",
+  "--strict-config",
+  "--tb=short",
+  "--cov=python/_utils",
+  "--cov-report=term-missing",
+  "--cov-report=html",
+  "--cov-report=xml",
+  "--cov-branch",
+  "--cov-fail-under=0",
+  "--durations=10",
+  "-ra",
+]
+markers = [
+  "unit: Unit tests",
+  "integration: Integration tests",
+  "slow: Slow running tests",
+  "aws: Tests requiring AWS services",
+  "alpaca: Tests requiring Alpaca API",
+  "vault: Tests requiring Vault",
+  "terraform: Tests requiring Terraform",
+  "ansible: Tests requiring Ansible",
+  "requires_network: Tests requiring network access",
+  "requires_docker: Tests requiring Docker",
+]
+
+[tool.coverage.run]
+source = ["python/_utils"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/__init__.py",
+    "*/setup.py",
+    "run_ci.py",
+    "setup-venv.py",
+    "tasks/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "@abstractmethod",
+  "@abc.abstractmethod",
+]
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+select = [
+  "E", "W", "F", "I", "N", "UP", "B", "C4", "DTZ", "T10", "EM", "ISC",
+  "ICN", "PIE", "PT", "Q", "RSE", "RET", "SIM", "TID", "ARG", "PTH",
+  "ERA", "PD", "PGH", "PL", "TRY", "NPY", "RUF",
+]
+ignore = [
+  "E501",
+  "PLR0913",
+  "PLR2004",
+  "TRY003",
+  "EM101",
+  "EM102",
+  "ISC001",
+]
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"python/tests/**/*.py" = ["ARG", "S101"]
+
+[tool.ruff.isort]
+known-first-party = ["_utils"]
+force-sort-within-sections = true
+split-on-trailing-comma = true
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+ignore_missing_imports = true

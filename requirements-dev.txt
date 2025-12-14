@@ -1,0 +1,29 @@
+# Development dependencies for _utils package
+# Install with: pip install -r requirements-dev.txt
+# Or use: pip install -e ".[dev]"
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.12.0
+pytest-timeout>=2.2.0
+
+# Code quality
+ruff>=0.1.0
+mypy>=1.7.0
+pre-commit>=3.5.0
+
+# Security scanning
+safety>=2.3.0
+bandit>=1.7.0
+
+# Coverage reporting
+coverage>=7.3.0
+
+# Build and distribution
+build>=1.0.0
+twine>=4.0.0
+
+# Vault integration (for testing)
+hvac>=1.0.0

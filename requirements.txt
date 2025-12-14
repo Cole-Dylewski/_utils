@@ -1,0 +1,15 @@
+# Base requirements for _utils package
+# This file contains the minimal dependencies required to use the package
+# Base package has no dependencies - all features are optional
+
+# To install with optional dependencies, use:
+# pip install -e ".[alpaca]"     # For Alpaca trading features
+# pip install -e ".[aws]"        # For AWS features
+# pip install -e ".[db]"         # For database features
+# pip install -e ".[fastapi]"   # For FastAPI features
+# pip install -e ".[ml]"        # For machine learning features
+# pip install -e ".[tableau]"   # For Tableau features
+# pip install -e ".[dev]"        # For development dependencies
+
+# Base dependencies (currently none - package is modular)
+# All dependencies are optional and installed via extras

@@ -1,0 +1,7 @@
+# Machine learning dependencies
+# Install with: pip install -r requirements-ml.txt
+# Or use: pip install -e ".[ml]"
+
+numpy>=1.26
+pandas>=2.0
+scikit-learn>=1.4
