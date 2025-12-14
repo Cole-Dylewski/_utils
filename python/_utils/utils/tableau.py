@@ -766,4 +766,5 @@ class TableauAPIClient:
             print(f"User ({user_id}) is not a memeber of the group '{group_name}'. Skipping")
         else:
             print(f"Failed to remove user {user_id} from group '{group_name}'.")
-            print(f"Status Code: {response.status_code}, Response: {response.text}")
+            # NOTE: Removed print statement - response.text may contain sensitive data
+            print(f"Status Code: {response.status_code}")

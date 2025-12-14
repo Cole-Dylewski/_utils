@@ -552,8 +552,7 @@ class tableau_client:
         response = requests.request("POST", url, headers=headers, data=payload)
 
         ""
-        if not getSites and self.printVerbose:
-            print("LOG IN", response)
+        # NOTE: Removed print statement - response may contain tokens
         self.credentials = json.loads(response.text).get("credentials")
         self.status = "ACTIVE"
         return json.loads(response.text).get("credentials")
@@ -574,8 +573,7 @@ class tableau_client:
         }
 
         response = requests.request("POST", url, headers=headers, data=payload)
-        if self.printVerbose:
-            print("LOG OUT RESPONSE", response, response.text)
+        # NOTE: Removed print statement - response may contain tokens
         # print('LOG OUT RESPONSE',response)
         self.status = "INACTIVE"
         return response.text

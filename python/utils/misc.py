@@ -403,8 +403,7 @@ def color_print(styles):
             styled_string += reset_code
         result += styled_string
 
-    # Print the concatenated result
-    print(result)
+    # NOTE: Removed print statement - result may contain sensitive data
 
 
 # # Example Usage

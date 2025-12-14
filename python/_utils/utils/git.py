@@ -65,9 +65,7 @@ def download_file(
     # Make the request
     response = requests.get(url, headers=headers)
 
-    # Debugging the response
-    print(f"Response Code: {response.status_code}")
-    print(f"Response Headers: {response.headers}")
+    # NOTE: Removed logging of response headers - may contain Authorization tokens
 
     # Check response
     if response.status_code == 200:
@@ -79,8 +77,7 @@ def download_file(
     if response.status_code == 404:
         print(f"Error: File not found at {filepath} in the {branch} branch.")
         return None
-    print(
-        f"Failed to fetch the file. Status code: {response.status_code}, Response: {response.text}"
-    )
+    # NOTE: Removed response.text from print - may contain sensitive data
+    print(f"Failed to fetch the file. Status code: {response.status_code}")
     response.raise_for_status()
     return None

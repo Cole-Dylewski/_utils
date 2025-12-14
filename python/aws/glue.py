@@ -94,7 +94,7 @@ class GlueHandler:
         """
         try:
             response = self.glue_client.delete_job(JobName=job_name)
-            logger.info(f"Job {job_name} deleted successfully: {response}")
+            logger.info(f"Job {job_name} deleted successfully")
         except ClientError as e:
             logger.exception(f"Failed to delete job {job_name}: {e}")
             raise

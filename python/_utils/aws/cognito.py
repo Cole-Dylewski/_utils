@@ -617,7 +617,8 @@ class CognitoHandler:
             self.cognito_client.admin_update_user_attributes(
                 UserPoolId=self.user_pool_id, Username=username, UserAttributes=update_attributes
             )
-            logger.info(f"Updated fields: {updates}")
+            # NOTE: Don't log updates dict - may contain sensitive data
+            logger.info("User attributes updated successfully")
             return {
                 "message": "User attributes updated successfully",
                 "updated_attributes": updates,
