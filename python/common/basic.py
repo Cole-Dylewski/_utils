@@ -473,22 +473,18 @@ def gen_rsa_keys(key_size=2048, format="pem", save_location=False):
         # print(type(save_location))
         if isinstance(save_location, bool):
             # print('TWAS BOOL',type(save_local))
-            private_key_file = open("private_key.pem", "w")
-            private_key_file.write(private_key)
-            private_key_file.close()
+            with open("private_key.pem", "w") as private_key_file:
+                private_key_file.write(private_key)
 
-            public_key_file = open("public_key.txt", "w")
-            public_key_file.write(public_key)
-            public_key_file.close()
+            with open("public_key.txt", "w") as public_key_file:
+                public_key_file.write(public_key)
 
         if isinstance(save_location, str):
-            private_key_file = open(f"{save_location}/private_key.pem", "w")
-            private_key_file.write(private_key)
-            private_key_file.close()
+            with open(f"{save_location}/private_key.pem", "w") as private_key_file:
+                private_key_file.write(private_key)
 
-            public_key_file = open(f"{save_location}/public_key.txt", "w")
-            public_key_file.write(public_key)
-            public_key_file.close()
+            with open(f"{save_location}/public_key.txt", "w") as public_key_file:
+                public_key_file.write(public_key)
 
     return keys
 

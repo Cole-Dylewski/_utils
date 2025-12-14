@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 import requests
 
 
@@ -15,7 +17,9 @@ def get_pull_requests_into_branch(git_token: str, repo: str, target_branch: str)
     """
     headers = {"Authorization": f"token {git_token}", "Accept": "application/vnd.github.v3+json"}
 
-    url = f"https://api.github.com/repos/{repo}/activity"
+    # Sanitize repo path to prevent URL injection
+    sanitized_repo = quote(repo, safe="/")
+    url = f"https://api.github.com/repos/{sanitized_repo}/activity"
     params = {
         "state": "all",  # could also use "open" or "closed"
         "base": target_branch,  # only PRs targeting this base branch
@@ -54,7 +58,12 @@ def download_file(
     """
 
     # Ensure correct authorization format for GitHub API
-    url = f"https://api.github.com/repos/{owner}/{repository}/contents/{filepath}?ref={branch}"
+    # Sanitize URL components to prevent injection
+    sanitized_owner = quote(owner, safe="")
+    sanitized_repo = quote(repository, safe="")
+    sanitized_filepath = quote(filepath, safe="/")
+    sanitized_branch = quote(branch, safe="")
+    url = f"https://api.github.com/repos/{sanitized_owner}/{sanitized_repo}/contents/{sanitized_filepath}?ref={sanitized_branch}"
     headers = {
         # "Authorization": f"Bearer {token}",  # Correct format
         "Accept": "application/vnd.github.v3.raw"
