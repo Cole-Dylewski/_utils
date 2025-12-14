@@ -407,7 +407,7 @@ class CognitoHandler:
                 logger.info(f"User {username} created successfully.")
 
             elif action == "RESET":
-                logger.info(f"Resetting password for user: {username}")
+                logger.info(f"Resetting credential for user: {username}")
 
                 # Reset password (forces user to change at next login)
                 self.cognito_client.admin_set_user_password(

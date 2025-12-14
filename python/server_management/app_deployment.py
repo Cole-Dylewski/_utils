@@ -131,7 +131,7 @@ class AppDeploymentConfig(ABC):
                         length=32, include_special=False, exclude_chars="\"'\\"
                     )
                     generated["database_password"] = self.credentials.database_password
-                    logger.info("Generated database password")
+                    logger.info("Generated database credential")
             elif cred_name.startswith("api_key_"):
                 key_name = cred_name.replace("api_key_", "")
                 if key_name not in self.credentials.api_keys or overwrite_existing:
@@ -210,7 +210,7 @@ class AppDeploymentConfig(ABC):
             if database_secret:
                 if "password" in database_secret:
                     self.credentials.database_password = database_secret["password"]
-                    logger.info("Loaded database password from Vault")
+                    logger.info("Loaded database credential from Vault")
                 else:
                     logger.warning(
                         f"Database secret found but 'password' key not present. "
@@ -274,7 +274,7 @@ class AppDeploymentConfig(ABC):
                     self.credentials.secrets["github_token"] = github_secrets["token"]
                     # Also add to api_keys for compatibility
                     self.credentials.api_keys["github_token"] = github_secrets["token"]
-                    logger.info("Loaded GitHub token from Vault at infra/github")
+                    logger.info("Loaded GitHub credential from Vault at infra/github")
                 if "ssh_key" in github_secrets:
                     self.credentials.secrets["github_ssh_key"] = github_secrets["ssh_key"]
                     logger.info("Loaded GitHub SSH key from Vault at infra/github")

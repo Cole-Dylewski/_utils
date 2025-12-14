@@ -75,7 +75,7 @@ class Credentials:
     def __post_init__(self) -> None:
         """Validate credentials."""
         if not self.database_password:
-            logger.warning("database_password not provided")
+            logger.warning("Database password not provided")
 
 
 @dataclass
@@ -130,7 +130,7 @@ class AppDeploymentConfig(ABC):
                         length=32, include_special=False, exclude_chars="\"'\\"
                     )
                     generated["database_password"] = self.credentials.database_password
-                    logger.info("Generated database password")
+                    logger.info("Generated database credential")
             elif cred_name.startswith("api_key_"):
                 key_name = cred_name.replace("api_key_", "")
                 if key_name not in self.credentials.api_keys or overwrite_existing:

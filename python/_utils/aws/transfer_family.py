@@ -362,7 +362,7 @@ class TransferFamilyHandler:
         2. Delete all existing SSH keys.
         3. Import the new SSH public key.
         """
-        logger.info(f"Resetting password (SSH key) for user {user_name} on server {server_id}")
+        logger.info(f"Resetting SSH key for user {user_name} on server {server_id}")
 
         try:
             # Step 1: List all existing SSH keys
