@@ -570,7 +570,7 @@ def _cmd_list(args, parser):
 
 
 def _cmd_list_all(args, parser):
-    """List all secrets with their values."""
+    """List all secrets with their keys only (values are not displayed for security)."""
     handler = _get_handler(args)
     client = handler.connect()
     if not client:
@@ -579,13 +579,6 @@ def _cmd_list_all(args, parser):
     secrets = handler.list_secrets()
     if not secrets:
         print("No secrets found.")
-        return
-
-    print("WARNING: This command will display sensitive information in plain text!")
-    print("=" * 80)
-    response = input("Do you want to continue? [y/N]: ")
-    if response.lower() != "y":
-        print("Cancelled.")
         return
 
     print(f"\nFound {len(secrets)} secret(s):\n")
@@ -598,17 +591,14 @@ def _cmd_list_all(args, parser):
         if secret_data:
             print(f"\nSecret: secret/{handler.base_path}/{secret_name}")
             print("-" * 80)
-            # Create masked data structure first to avoid CodeQL false positive
-            # Values are sanitized via _mask_sensitive_value() before any output
-            masked_output = {
-                key: _mask_sensitive_value(value) for key, value in secret_data.items()
-            }
-            for key, masked_value in masked_output.items():
-                print(f"  {key}: {masked_value}")
+            # Only print keys for security - values are never displayed
+            for key in secret_data:
+                print(f"  {key}: [REDACTED]")
             print()
 
     print("=" * 80)
     print(f"\nTotal: {len(secrets)} secret(s)")
+    print("NOTE: Secret values are not displayed for security reasons.")
 
 
 def _cmd_get(args, parser):
@@ -625,28 +615,18 @@ def _cmd_get(args, parser):
         sys.exit(1)
 
     if args.json:
-        # Create masked data structure first to avoid CodeQL false positive
-        # Values are sanitized via _mask_sensitive_value() before any output
-        masked_data = {key: _mask_sensitive_value(value) for key, value in secret_data.items()}
-        # Only masked (non-sensitive) data is printed
-        print(json.dumps(masked_data, indent=2))
-        print("\nWARNING: Values are masked for security.", file=sys.stderr)
+        # Only output keys for security - values are never included in JSON output
+        keys_only = dict.fromkeys(secret_data.keys(), "[REDACTED]")
+        print(json.dumps(keys_only, indent=2))
+        print("\nNOTE: Secret values are not displayed for security reasons.", file=sys.stderr)
     else:
-        print("WARNING: This command will display sensitive information in plain text!")
-        print("=" * 60)
-        response = input("Do you want to continue? [y/N]: ")
-        if response.lower() != "y":
-            print("Cancelled.")
-            return
-
         print(f"\nSecret: secret/{handler.base_path}/{args.secret_name}")
         print("=" * 60)
-        # Create masked data structure first to avoid CodeQL false positive
-        # Values are sanitized via _mask_sensitive_value() before any output
-        masked_output = {key: _mask_sensitive_value(value) for key, value in secret_data.items()}
-        for key, masked_value in masked_output.items():
-            print(f"{key}: {masked_value}")
+        # Only print keys for security - values are never displayed
+        for key in secret_data:
+            print(f"{key}: [REDACTED]")
         print("=" * 60)
+        print("NOTE: Secret values are not displayed for security reasons.")
 
 
 def _cmd_put(args, parser):
