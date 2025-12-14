@@ -36,10 +36,10 @@ format-check: ## Check code formatting
 	ruff format --check .
 
 type-check: ## Run type checker
-	mypy python/_utils
+	mypy python
 
 security: ## Run security checks
-	bandit -r python/_utils
+	bandit -r python
 	safety check
 
 quality: lint format-check type-check ## Run all quality checks

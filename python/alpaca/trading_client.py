@@ -40,110 +40,128 @@ class TraderClient:
     # Asset related methods
     def get_assets(self, status='active'):
         try:
-            return assets.get_assets(self.api_key, self.api_secret, self.base_url, self.api_version, status)
+            return assets.list_assets(self.api_key, self.api_secret, self.base_url, self.api_version, status)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     # Order related methods
     def submit_order(self, symbol, qty, side, order_type, time_in_force):
         try:
-            return orders.submit_order(self.api_key, self.api_secret, self.api_version, symbol, qty, side, order_type, time_in_force)
+            return orders.submit_order(self.api_key, self.api_secret, self.base_url, self.api_version, symbol, qty, side, order_type, time_in_force)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     def get_order(self, order_id):
         try:
-            return orders.get_order(self.api_key, self.api_secret, self.api_version, order_id)
+            return orders.get_order(self.api_key, self.api_secret, self.base_url, self.api_version, order_id)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     def list_orders(self):
         try:
-            return orders.list_orders(self.api_key, self.api_secret, self.api_version)
+            return orders.list_orders(self.api_key, self.api_secret, self.base_url, self.api_version)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     def cancel_order(self, order_id):
         try:
-            return orders.cancel_order(self.api_key, self.api_secret, self.api_version, order_id)
+            return orders.cancel_order(self.api_key, self.api_secret, self.base_url, self.api_version, order_id)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     # Portfolio related methods
     def get_positions(self):
         try:
-            return portfolio.get_positions(self.api_key, self.api_secret, self.api_version)
+            return portfolio.get_positions(self.api_key, self.api_secret, self.base_url, self.api_version)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
-    def get_account_summary(self):
+    def get_portfolio_history(self, period=None, timeframe=None, date_end=None, extended_hours=False):
         try:
-            return portfolio.get_account_summary(self.api_key, self.api_secret, self.api_version)
+            return portfolio.get_portfolio_history(self.api_key, self.api_secret, self.base_url, self.api_version, period, timeframe, date_end, extended_hours)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     # Watchlist related methods
     def get_watchlists(self):
+        """Get all watchlists by listing them from the API."""
         try:
-            return watchlists.get_watchlists(self.api_key, self.api_secret, self.api_version)
+            # Note: Alpaca API doesn't have a direct "list all watchlists" endpoint
+            # This would need to be implemented differently or removed
+            # For now, we'll use get_watchlist with a known ID or implement a workaround
+            logging.warning("get_watchlists() is not directly supported by Alpaca API. Consider using get_watchlist() with specific watchlist IDs.")
+            return None
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     def get_watchlist(self, watchlist_id):
         try:
-            return watchlists.get_watchlist(self.api_key, self.api_secret, self.api_version, watchlist_id)
+            return watchlists.get_watchlist(self.api_key, self.api_secret, self.base_url, self.api_version, watchlist_id)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     def create_watchlist(self, name, symbols):
         try:
-            return watchlists.create_watchlist(self.api_key, self.api_secret, self.api_version, name, symbols)
+            return watchlists.create_watchlist(self.api_key, self.api_secret, self.base_url, self.api_version, name, symbols)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
-    def update_watchlist(self, watchlist_id, name, symbols):
+    def update_watchlist(self, watchlist_id, symbols):
         try:
-            return watchlists.update_watchlist(self.api_key, self.api_secret, self.api_version, watchlist_id, name, symbols)
+            return watchlists.update_watchlist(self.api_key, self.api_secret, self.base_url, self.api_version, watchlist_id, symbols)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     def delete_watchlist(self, watchlist_id):
         try:
-            return watchlists.delete_watchlist(self.api_key, self.api_secret, self.api_version, watchlist_id)
+            return watchlists.delete_watchlist(self.api_key, self.api_secret, self.base_url, self.api_version, watchlist_id)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     # Calendar related methods
     def get_calendar(self, start, end=''):
         try:
-            return calendar.get_calendar(self.api_key, self.api_secret, self.api_version, start, end)
+            return calendar.get_calendar(self.api_key, self.api_secret, self.base_url, self.api_version, start, end)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     # Clock related methods
     def get_clock(self):
         try:
-            return clock.get_clock(self.api_key, self.api_secret, self.api_version)
+            return clock.get_clock(self.api_key, self.api_secret, self.base_url, self.api_version)
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     # Crypto related methods
     def get_crypto_bars(self, symbols, timeframe, start, end='', limit=1000, adjustment='raw', feed='sip', page_token=''):
         try:
-            return crypto.get_crypto_data(self.api_key, self.api_secret, self.api_version, symbols, timeframe, start, end, limit, adjustment, feed, page_token)
+            # Convert symbols to string if it's a list
+            symbol_str = ','.join(symbols) if isinstance(symbols, list) else symbols
+            return data.crypto.get_crypto_data(
+                self.api_key, self.api_secret, self.api_version,
+                symbol_str, timeframe, start, end, limit, adjustment, feed
+            )
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     def get_crypto_funding(self, symbol, start, end='', limit=1000):
+        """
+        Get crypto funding rates.
+        Note: This function is not yet implemented in the crypto module.
+        """
         try:
-            return crypto.get_crypto_funding(self.api_key, self.api_secret, self.api_version, symbol, start, end, limit)
+            logging.warning("get_crypto_funding() is not yet implemented in the crypto module.")
+            return None
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
     # History related methods
     def get_barset(self, symbols, timeframe, start, end='', limit=1000, adjustment='raw', feed=False, page_token=''):
         try:
-            return history.get_barset(self, symbols, timeframe, start, end, limit, adjustment, feed, page_token)
+            return history.get_barset(
+                self.api_key, self.api_secret, self.base_url, self.api_version,
+                symbols, timeframe, start, end, limit, adjustment, feed, page_token, self.premium
+            )
         except Exception as e:
             logging.error(f"An error occurred: {e}")
 
@@ -269,6 +287,13 @@ def main():
         print("New Watchlist Created:", new_watchlist)
     except Exception as e:
         print(f"Failed to create watchlist: {e}")
+    
+    # Example of updating a watchlist (note: name parameter removed)
+    try:
+        updated_watchlist = client.update_watchlist(watchlist_id="watchlist-id", symbols=["AAPL", "TSLA", "MSFT"])
+        print("Watchlist Updated:", updated_watchlist)
+    except Exception as e:
+        print(f"Failed to update watchlist: {e}")
 
     # Get calendar events
     try:

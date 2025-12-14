@@ -101,13 +101,13 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["python/_utils"]
+source = ["python"]
 omit = [
-  "*/tests/*",
-  "*/test_*.py",
-  "*/__pycache__/*",
-  "*/__init__.py",
-  "*/setup.py",
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/__init__.py",
+    "*/setup.py",
 ]
 
 [tool.coverage.report]

@@ -66,10 +66,10 @@ Thank you for your interest in contributing to _utils! This document provides gu
    ruff format .
    
    # Type check
-   mypy python/_utils
+   mypy python
    
    # Security scan
-   bandit -r python/_utils
+   bandit -r python
    safety check
    ```
 

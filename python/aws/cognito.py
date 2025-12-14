@@ -3,9 +3,10 @@ import boto3
 import os
 from fastapi import HTTPException
 from pydantic import BaseModel
-from _utils.auth.jwt_tokens import decode_token, get_cognito_user_id
 from typing import Optional
 from datetime import datetime, timedelta, timezone
+import base64
+import json
 
 # Set up logging
 import logging
@@ -137,7 +138,7 @@ class CognitoHandler:
         except self.cognito_client.exceptions.PasswordResetRequiredException as e:
             logger.error(f"Password reset required: {str(e)}")
             raise HTTPException(status_code=401, detail="Password reset required")
-        except self.cognito_client.exceptions.UserNotConfirmedException:
+        except self.cognito_client.exceptions.UserNotConfirmedException as e:
             logger.error(f"User is not confirmed: {str(e)}")
             raise HTTPException(status_code=403, detail="User is not confirmed")
         except self.cognito_client.exceptions.UserNotFoundException as e:
@@ -321,8 +322,9 @@ class CognitoHandler:
         except self.cognito_client.exceptions.CodeMismatchException as e:
             logger.error(f"Invalid confirmation code: {str(e)}")
             raise HTTPException(status_code=401, detail="Invalid confirmation code.")
-        except self.cognito_client.LimitExceededException as e:
+        except self.cognito_client.exceptions.LimitExceededException as e:
             logger.error(f"Too many attempts. Please wait for sometime before making request.: {str(e)}")
+            raise HTTPException(status_code=429, detail="Too many attempts. Please wait before making another request.")
         except Exception as e:
             logger.error(f"Error confirming password reset: {str(e)}")
             raise HTTPException(status_code=500, detail="Failed to confirm password reset")    
@@ -710,7 +712,52 @@ class CognitoHandler:
             logger.error(f"Failed to delete Cognito user {cognito_user_id}: {str(e)}")
             raise HTTPException(status_code=500, detail="Failed to delete user from Cognito")    
     
-    # Fix AWS Perission to make this function work
+    def _decode_token(self, token: str) -> dict:
+        """
+        Decode a JWT token without verification (for extracting user info).
+        Note: In production, tokens should be verified using proper JWT libraries.
+        
+        Args:
+            token: JWT token string
+            
+        Returns:
+            dict: Decoded token payload
+        """
+        try:
+            # Split token into parts
+            parts = token.split('.')
+            if len(parts) != 3:
+                raise ValueError("Invalid token format")
+            
+            # Decode the payload (second part)
+            payload = parts[1]
+            # Add padding if needed
+            padding = 4 - len(payload) % 4
+            if padding != 4:
+                payload += '=' * padding
+            
+            decoded = base64.urlsafe_b64decode(payload)
+            return json.loads(decoded)
+        except Exception as e:
+            logger.error(f"Error decoding token: {str(e)}")
+            raise HTTPException(status_code=400, detail=f"Invalid token format: {str(e)}")
+    
+    def _get_cognito_user_id(self, decoded_token: dict) -> str:
+        """
+        Extract Cognito user ID from decoded token.
+        
+        Args:
+            decoded_token: Decoded JWT token payload
+            
+        Returns:
+            str: Cognito user ID (sub claim)
+        """
+        user_id = decoded_token.get('sub')
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Token does not contain user ID (sub claim)")
+        return user_id
+    
+    # Fix AWS Permission to make this function work
     def admin_global_signout_user(self, access_token: str):        
         """
         Invalidates the identity, access, and refresh tokens that Amazon Cognito issued to a user.
@@ -721,8 +768,8 @@ class CognitoHandler:
             dict: A message indicating that signout was successful by admin.
         """
         try:
-            decoded_id_token = decode_token(token=access_token)
-            cognito_user_id = get_cognito_user_id(decoded_id_token)
+            decoded_id_token = self._decode_token(token=access_token)
+            cognito_user_id = self._get_cognito_user_id(decoded_id_token)
             logger.info(f"cognito_user_id: {cognito_user_id}")
             
             response = self.cognito_client.admin_user_global_sign_out(

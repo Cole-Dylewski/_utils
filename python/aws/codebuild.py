@@ -41,10 +41,9 @@ class CodebuildHandler:
             logger.error(f"Failed to initialize Codebuild client: {e}")
             raise
         
-    async def get_project_config(self,project_name):
-        
+    def get_project_config(self, project_name):
         """
-    Updates an AWS CodeBuild project with detailed arguments for subfields.
+        Retrieves the configuration of an AWS CodeBuild project.
 
     Args:
         project_name (str): The name of the CodeBuild project to update.
@@ -161,7 +160,7 @@ class CodebuildHandler:
             print(f"Error retrieving project: {e}")
             return None
     
-    async def update_codebuild_project_json(
+    def update_codebuild_project_json(
         self,
         project_name,
         **kwargs
@@ -179,7 +178,7 @@ class CodebuildHandler:
         """
         try:
             # Fetch current project configuration
-            current_config = await self.get_project_config(project_name)
+            current_config = self.get_project_config(project_name)
             if not current_config:
                 raise ValueError(f"Project {project_name} not found or inaccessible.")
 
@@ -201,7 +200,7 @@ class CodebuildHandler:
             logger.error(f"Failed to update project {project_name}: {e}")
             raise
         
-    async def update_codebuild_project(
+    def update_codebuild_project(
         self,
         project_name,
         description=None,
@@ -278,7 +277,7 @@ class CodebuildHandler:
         """
         try:
             # Fetch current project configuration
-            current_config = await self.get_project_config(project_name)
+            current_config = self.get_project_config(project_name)
             if not current_config:
                 raise ValueError(f"Project {project_name} not found or inaccessible.")
 
@@ -358,7 +357,7 @@ class CodebuildHandler:
             logger.error(f"Failed to update project {project_name}: {e}")
             raise
 
-    async def start_build(self, project_name):
+    def start_build(self, project_name):
         """
         Starts a build for the specified AWS CodeBuild project, retrieves the build logs,
         and provides a CloudWatch link to the logs.

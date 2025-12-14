@@ -191,7 +191,7 @@ def print_activation_instructions() -> None:
     
     print_status("\nTo run all quality checks:", "info")
     print("  make quality")
-    print("  # or on Windows: python -m ruff check . && python -m mypy python/_utils")
+    print("  # or on Windows: python -m ruff check . && python -m mypy python")
     print()
 
 

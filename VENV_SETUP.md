@@ -198,7 +198,7 @@ python setup-venv.py
 After setting up the virtual environment:
 
 1. **Run tests**: `pytest`
-2. **Check code quality**: `make quality` or `ruff check . && mypy python/_utils`
+2. **Check code quality**: `make quality` or `ruff check . && mypy python`
 3. **Format code**: `ruff format .`
 4. **Run pre-commit hooks**: `pre-commit run --all-files`
 

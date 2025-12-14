@@ -592,13 +592,13 @@ ruff format .
 **MyPy (Type Checking)**
 ```bash
 # Type check the codebase
-mypy python/_utils
+mypy python
 ```
 
 **Bandit (Security Scanning)**
 ```bash
 # Scan for security issues
-bandit -r python/_utils
+bandit -r python
 ```
 
 **Safety (Dependency Scanning)**

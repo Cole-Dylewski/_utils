@@ -1,1 +1,3 @@
-print("BROKER INIT?")
+"""
+Broker API module for Alpaca trading platform.
+"""

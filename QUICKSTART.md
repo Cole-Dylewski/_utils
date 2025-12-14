@@ -69,7 +69,7 @@ ruff check .
 ruff format .
 
 # Type check
-mypy python/_utils
+mypy python
 
 # Run all quality checks (if Make is available)
 make quality
