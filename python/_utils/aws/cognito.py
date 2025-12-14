@@ -85,7 +85,7 @@ class CognitoHandler:
                 AuthFlow="USER_PASSWORD_AUTH",
                 AuthParameters={"USERNAME": username, "PASSWORD": password},
             )
-            logger.info(f"response - {response}")
+            logger.info("Authentication response received")
 
             challenge_name = response.get("ChallengeName")
             session = response.get("Session")
@@ -149,7 +149,7 @@ class CognitoHandler:
         Returns:
             dict: A dictionary containing the Cognito user ID and tokens.
         """
-        logger.info(f"Refreshing token for refresh token: {refresh_token}")
+        logger.info("Refreshing token for user")
         try:
             response = self.cognito_client.initiate_auth(
                 ClientId=self.client_id,
@@ -157,11 +157,9 @@ class CognitoHandler:
                 AuthParameters={"REFRESH_TOKEN": refresh_token},
             )
             result = response["AuthenticationResult"]
-            print(result)
-
             # Decode the ID token to extract the Cognito user ID (sub)
             id_token = result["IdToken"]
-            print(id_token)
+            # NOTE: Tokens are sensitive - never print them
 
             return {
                 "challenge_name": "SUCCESS",
@@ -173,10 +171,10 @@ class CognitoHandler:
             }
 
         except self.cognito_client.exceptions.NotAuthorizedException:
-            logger.warning(f"Invalid refresh token: {refresh_token}")
+            logger.warning("Invalid refresh token provided")
             raise HTTPException(status_code=401, detail="Invalid refresh token")
         except self.cognito_client.exceptions.UserNotFoundException:
-            logger.warning(f"User not found: {refresh_token}")
+            logger.warning("User not found for refresh token")
             raise HTTPException(status_code=404, detail="User not found")
         except Exception as e:
             logger.exception(f"Error during token refresh: {e!s}")
