@@ -3,7 +3,6 @@ Tests for Vault utilities.
 """
 
 import pytest
-from unittest.mock import Mock, patch
 
 
 @pytest.mark.vault
@@ -19,6 +18,7 @@ class TestVaultUtils:
         """Test that Vault module can be imported."""
         try:
             from _utils.server_management import vault
+
             assert vault is not None
         except ImportError:
             pytest.skip("Vault module not available (hvac not installed)")
@@ -27,7 +27,7 @@ class TestVaultUtils:
         """Test VaultHandler initialization."""
         try:
             from _utils.server_management.vault import VaultHandler
-            
+
             handler = VaultHandler(
                 vault_addr="https://vault.example.com:8200",
                 base_path="test",
@@ -45,4 +45,3 @@ class TestVaultUtils:
 def test_vault_integration():
     """Integration test for Vault - requires Vault server."""
     pytest.skip("Vault integration tests require Vault server access")
-

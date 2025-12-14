@@ -8,10 +8,10 @@ Supports application-specific diagnostics via modular diagnostic modules.
 
 import argparse
 import logging
+from pathlib import Path
 import subprocess
 import sys
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any
 
 # Add parent directory to path to import _utils
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -31,9 +31,9 @@ def run_remote_command(
     user: str,
     command: str,
     port: int = 22,
-    ssh_key_path: Optional[str] = None,
+    ssh_key_path: str | None = None,
     timeout: int = 30,
-) -> Tuple[int, str, str]:
+) -> tuple[int, str, str]:
     """
     Run a command on remote server via SSH.
 
@@ -64,6 +64,7 @@ def run_remote_command(
     try:
         result = subprocess.run(
             ssh_cmd,
+            check=False,
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -75,9 +76,7 @@ def run_remote_command(
         return 1, "", str(e)
 
 
-def check_system_info(
-    host: str, user: str, port: int, ssh_key_path: Optional[str]
-) -> Dict[str, str]:
+def check_system_info(host: str, user: str, port: int, ssh_key_path: str | None) -> dict[str, str]:
     """Check basic system information."""
     logger.info("=== System Information ===")
 
@@ -91,15 +90,11 @@ def check_system_info(
         "kernel": "uname -r",
         "arch": "uname -m",
         "uptime": "uptime",
-        "timezone": (
-            "timedatectl show --property=Timezone --value 2>/dev/null || date +%Z"
-        ),
+        "timezone": ("timedatectl show --property=Timezone --value 2>/dev/null || date +%Z"),
     }
 
     for key, cmd in commands.items():
-        returncode, stdout, stderr = run_remote_command(
-            host, user, cmd, port, ssh_key_path
-        )
+        returncode, stdout, _stderr = run_remote_command(host, user, cmd, port, ssh_key_path)
         if returncode == 0:
             info[key] = stdout.strip()
             logger.info(f"  {key}: {info[key]}")
@@ -111,8 +106,8 @@ def check_system_info(
 
 
 def check_system_resources(
-    host: str, user: str, port: int, ssh_key_path: Optional[str]
-) -> Dict[str, Any]:
+    host: str, user: str, port: int, ssh_key_path: str | None
+) -> dict[str, Any]:
     """Check system resources."""
     logger.info("=== System Resources ===")
 
@@ -162,7 +157,7 @@ def check_system_resources(
 
     # Load average
     cmd = "uptime | awk -F'load average:' '{print $2}'"
-    returncode, stdout, stderr = run_remote_command(host, user, cmd, port, ssh_key_path)
+    returncode, stdout, _stderr = run_remote_command(host, user, cmd, port, ssh_key_path)
     if returncode == 0:
         resources["load_average"] = stdout.strip()
         logger.info(f"  Load Average: {resources['load_average']}")
@@ -171,8 +166,8 @@ def check_system_resources(
 
 
 def check_docker_containers(
-    host: str, user: str, port: int, ssh_key_path: Optional[str]
-) -> List[Dict[str, str]]:
+    host: str, user: str, port: int, ssh_key_path: str | None
+) -> list[dict[str, str]]:
     """Check Docker containers status."""
     logger.info("=== Docker Containers ===")
 
@@ -183,7 +178,7 @@ def check_docker_containers(
         "docker ps -a --format "
         "'{{.Names}}|{{.Image}}|{{.Status}}|{{.Ports}}' 2>/dev/null || echo ''"
     )
-    returncode, stdout, stderr = run_remote_command(host, user, cmd, port, ssh_key_path)
+    returncode, stdout, _stderr = run_remote_command(host, user, cmd, port, ssh_key_path)
 
     if returncode == 0 and stdout.strip():
         for line in stdout.strip().split("\n"):
@@ -212,9 +207,9 @@ def check_systemd_services(
     host: str,
     user: str,
     port: int,
-    ssh_key_path: Optional[str],
-    app_services: Optional[List[str]] = None,
-) -> List[Dict[str, str]]:
+    ssh_key_path: str | None,
+    app_services: list[str] | None = None,
+) -> list[dict[str, str]]:
     """
     Check systemd services status.
 
@@ -248,9 +243,8 @@ def check_systemd_services(
                         "sub": parts[3] if len(parts) > 3 else "",
                     }
                     # Only include active services or app-specific services
-                    if (
-                        service["active"] == "active"
-                        or (app_services and service["name"] in app_services)
+                    if service["active"] == "active" or (
+                        app_services and service["name"] in app_services
                     ):
                         services.append(service)
                         status_icon = "✓" if service["active"] == "active" else "✗"
@@ -266,9 +260,7 @@ def check_systemd_services(
             if any(s["name"] == svc for s in services):
                 continue
             cmd = f"systemctl is-active {svc} 2>/dev/null || echo 'inactive'"
-            returncode, stdout, stderr = run_remote_command(
-                host, user, cmd, port, ssh_key_path
-            )
+            returncode, stdout, _stderr = run_remote_command(host, user, cmd, port, ssh_key_path)
             if returncode == 0:
                 status = stdout.strip()
                 if status != "inactive":
@@ -289,9 +281,9 @@ def check_network_ports(
     host: str,
     user: str,
     port: int,
-    ssh_key_path: Optional[str],
-    ports_to_check: Optional[List[int]] = None,
-) -> Dict[int, Dict[str, str]]:
+    ssh_key_path: str | None,
+    ports_to_check: list[int] | None = None,
+) -> dict[int, dict[str, str]]:
     """
     Check network ports and their listeners.
 
@@ -315,9 +307,7 @@ def check_network_ports(
             f"ss -tuln 2>/dev/null | grep -q ':{check_port} ' && "
             f"echo 'listening' || echo 'not_listening'"
         )
-        returncode, stdout, stderr = run_remote_command(
-            host, user, cmd, port, ssh_key_path
-        )
+        returncode, stdout, stderr = run_remote_command(host, user, cmd, port, ssh_key_path)
 
         is_listening = "listening" in stdout.lower() if returncode == 0 else False
 
@@ -325,9 +315,7 @@ def check_network_ports(
         process_info = ""
         if is_listening:
             cmd = f"ss -tulnp 2>/dev/null | grep ':{check_port} ' | head -1"
-            returncode, stdout, stderr = run_remote_command(
-                host, user, cmd, port, ssh_key_path
-            )
+            returncode, stdout, _stderr = run_remote_command(host, user, cmd, port, ssh_key_path)
             if returncode == 0:
                 process_info = stdout.strip()
 
@@ -338,16 +326,15 @@ def check_network_ports(
 
         status_icon = "✓" if is_listening else "○"
         logger.info(
-            f"  {status_icon} Port {check_port}: "
-            f"{'LISTENING' if is_listening else 'not listening'}"
+            f"  {status_icon} Port {check_port}: {'LISTENING' if is_listening else 'not listening'}"
         )
 
     return ports_info
 
 
 def check_dependencies(
-    host: str, user: str, port: int, ssh_key_path: Optional[str]
-) -> Dict[str, Dict[str, str]]:
+    host: str, user: str, port: int, ssh_key_path: str | None
+) -> dict[str, dict[str, str]]:
     """Check installed dependencies."""
     logger.info("=== Dependencies ===")
 
@@ -363,9 +350,7 @@ def check_dependencies(
     }
 
     for dep_name, cmd in dependencies.items():
-        returncode, stdout, stderr = run_remote_command(
-            host, user, cmd, port, ssh_key_path
-        )
+        returncode, stdout, _stderr = run_remote_command(host, user, cmd, port, ssh_key_path)
         if returncode == 0 and stdout.strip() and "not found" not in stdout.lower():
             version = stdout.strip()
             deps[dep_name] = {"installed": True, "version": version}
@@ -378,17 +363,17 @@ def check_dependencies(
 
 
 def generate_report(
-    system_info: Dict,
-    resources: Dict,
-    containers: List[Dict],
-    services: List[Dict],
-    ports: Dict,
-    health: Dict,
-    configs: Dict,
-    logs: Dict,
-    deps: Dict,
-    fs_info: Dict,
-    app_name: Optional[str] = None,
+    system_info: dict,
+    resources: dict,
+    containers: list[dict],
+    services: list[dict],
+    ports: dict,
+    health: dict,
+    configs: dict,
+    logs: dict,
+    deps: dict,
+    fs_info: dict,
+    app_name: str | None = None,
 ) -> str:
     """Generate a comprehensive diagnostic report."""
     report = []
@@ -416,9 +401,7 @@ def generate_report(
             f"({resources['disk'].get('use_percent', 'Unknown')} used)"
         )
     if "memory" in resources:
-        report.append(
-            f"Memory: {resources['memory'].get('available', 'Unknown')} available"
-        )
+        report.append(f"Memory: {resources['memory'].get('available', 'Unknown')} available")
     if "cpu_cores" in resources:
         report.append(f"CPU Cores: {resources['cpu_cores']}")
     report.append("")
@@ -457,11 +440,7 @@ def generate_report(
     if health:
         report.append("## Application Health")
         for app, health_info in health.items():
-            status = (
-                "✓"
-                if health_info.get("status") in ["healthy", "reachable"]
-                else "✗"
-            )
+            status = "✓" if health_info.get("status") in ["healthy", "reachable"] else "✗"
             report.append(f"{status} {app}: {health_info.get('status', 'unknown')}")
         report.append("")
 
@@ -502,14 +481,10 @@ def generate_report(
             error_count = sum(
                 1
                 for line in log_lines
-                if "error" in line.lower()
-                or "failed" in line.lower()
-                or "fatal" in line.lower()
+                if "error" in line.lower() or "failed" in line.lower() or "fatal" in line.lower()
             )
             if error_count > 0:
-                report.append(
-                    f"⚠ {log_name}: {error_count} error(s) in recent logs"
-                )
+                report.append(f"⚠ {log_name}: {error_count} error(s) in recent logs")
             else:
                 report.append(f"✓ {log_name}: No recent errors")
         report.append("")
@@ -525,10 +500,10 @@ def diagnose_server(
     host: str,
     user: str,
     port: int = 22,
-    ssh_key_path: Optional[str] = None,
-    app_name: Optional[str] = None,
-    app_path: Optional[str] = None,
-    output_file: Optional[str] = None,
+    ssh_key_path: str | None = None,
+    app_name: str | None = None,
+    app_path: str | None = None,
+    output_file: str | None = None,
 ) -> bool:
     """
     Perform comprehensive server diagnostic.
@@ -550,7 +525,7 @@ def diagnose_server(
     try:
         # Test SSH connection
         logger.info("Testing SSH connection...")
-        returncode, stdout, stderr = run_remote_command(
+        returncode, _stdout, stderr = run_remote_command(
             host, user, "echo 'SSH connection successful'", port, ssh_key_path
         )
         if returncode != 0:
@@ -564,9 +539,7 @@ def diagnose_server(
         ports_to_check = None
 
         if app_name:
-            app_diagnostic = DiagnosticRegistry.create_diagnostic(
-                app_name, run_remote_command
-            )
+            app_diagnostic = DiagnosticRegistry.create_diagnostic(app_name, run_remote_command)
             if app_diagnostic:
                 logger.info(f"Loaded diagnostic module for: {app_name}")
                 app_services = app_diagnostic.get_systemd_services()
@@ -575,8 +548,7 @@ def diagnose_server(
                     app_path = app_diagnostic.get_app_path()
             else:
                 logger.warning(
-                    f"No diagnostic module found for '{app_name}', "
-                    "running generic diagnostics only"
+                    f"No diagnostic module found for '{app_name}', running generic diagnostics only"
                 )
 
         # Run generic diagnostic checks
@@ -589,14 +561,10 @@ def diagnose_server(
         containers = check_docker_containers(host, user, port, ssh_key_path)
         logger.info("")
 
-        services = check_systemd_services(
-            host, user, port, ssh_key_path, app_services=app_services
-        )
+        services = check_systemd_services(host, user, port, ssh_key_path, app_services=app_services)
         logger.info("")
 
-        ports = check_network_ports(
-            host, user, port, ssh_key_path, ports_to_check=ports_to_check
-        )
+        ports = check_network_ports(host, user, port, ssh_key_path, ports_to_check=ports_to_check)
         logger.info("")
 
         deps = check_dependencies(host, user, port, ssh_key_path)
@@ -609,9 +577,7 @@ def diagnose_server(
         fs_info = {}
 
         if app_diagnostic:
-            health = app_diagnostic.check_application_health(
-                host, user, port, ssh_key_path
-            )
+            health = app_diagnostic.check_application_health(host, user, port, ssh_key_path)
             logger.info("")
 
             configs = app_diagnostic.check_configuration_files(
@@ -654,7 +620,7 @@ def diagnose_server(
                     f.write(report)
                 logger.info(f"Report saved to: {output_file}")
             except Exception as e:
-                logger.error(f"Failed to save report: {e}")
+                logger.exception(f"Failed to save report: {e}")
 
         return True
 
@@ -709,7 +675,7 @@ Examples:
     )
     parser.add_argument(
         "--app",
-        choices=DiagnosticRegistry.list_apps() + ["none"],
+        choices=[*DiagnosticRegistry.list_apps(), "none"],
         help=f"Application name for app-specific diagnostics. "
         f"Available: {', '.join(DiagnosticRegistry.list_apps())}. "
         f"Use 'none' for generic diagnostics only.",

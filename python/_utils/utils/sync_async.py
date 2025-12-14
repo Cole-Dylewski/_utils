@@ -1,10 +1,11 @@
 import asyncio
 import concurrent.futures
 
+
 def run_async_function(async_func, *args, **kwargs):
     """
     Runs an async function inside a synchronous function, adapting to different environments.
-    
+
     Works in:
     - Jupyter Notebooks
     - Local Python scripts
@@ -29,16 +30,16 @@ def run_async_function(async_func, *args, **kwargs):
     if loop and loop.is_running():
         print("Detected running event loop, using `nest_asyncio` for Jupyter.")
         import nest_asyncio
+
         nest_asyncio.apply()
         return asyncio.run(async_func(*args, **kwargs))
 
     # If no event loop exists (e.g., normal Python script or AWS Lambda)
-    elif not loop:
+    if not loop:
         return asyncio.run(async_func(*args, **kwargs))
 
     # If inside AWS Glue or other complex environments
-    else:
-        print("Using ThreadPoolExecutor for AWS Glue or other complex environments.")
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(run_async_function, async_func, *args, **kwargs)
-            return future.result()
+    print("Using ThreadPoolExecutor for AWS Glue or other complex environments.")
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(run_async_function, async_func, *args, **kwargs)
+        return future.result()

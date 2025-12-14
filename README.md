@@ -464,7 +464,7 @@ source activate-venv.sh
 ```
 
 **Windows PowerShell:**
-```powershell
+   ```powershell
 .venv\Scripts\Activate.ps1
 # or use the convenience script
 .\activate-venv.ps1
@@ -542,6 +542,17 @@ Pre-commit hooks include:
 
 #### Running Tests Locally
 
+**Quick CI Check:**
+```bash
+# Run all CI checks locally (tests, lint, type-check, security, build)
+python run_ci.py
+
+# Run specific checks
+python run_ci.py --test --lint
+python run_ci.py --build
+```
+
+**Manual Testing:**
 ```bash
 # Run all tests
 pytest
@@ -764,4 +775,3 @@ MIT License - See LICENSE file for details
 ## Author
 
 Cole Dylewski
-

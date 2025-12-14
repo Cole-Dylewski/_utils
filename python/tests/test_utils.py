@@ -3,7 +3,6 @@ Tests for utils module.
 """
 
 import pytest
-from typing import Any
 
 
 @pytest.mark.unit
@@ -18,6 +17,7 @@ class TestUtilsModule:
         """Test that utils modules can be imported."""
         try:
             from _utils.utils import misc
+
             assert misc is not None
         except ImportError:
             pytest.skip("utils.misc module not available")
@@ -45,7 +45,7 @@ def test_utils_imports():
         "tableau",
         "teams",
     ]
-    
+
     for module_name in modules_to_test:
         try:
             module = __import__(f"_utils.utils.{module_name}", fromlist=[module_name])
@@ -53,4 +53,3 @@ def test_utils_imports():
         except ImportError:
             # Some modules may have optional dependencies
             pass
-

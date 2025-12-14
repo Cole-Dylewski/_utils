@@ -1,12 +1,14 @@
 # accounts.py
 
-import requests
 import logging
+
+import requests
+
 
 def create_account(base_url, api_version, headers, account_data):
     """
     Create a new account using the provided account data.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -19,16 +21,17 @@ def create_account(base_url, api_version, headers, account_data):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def get_account(base_url, api_version, headers, account_id):
     """
     Retrieve details of a specific account by its ID.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -41,16 +44,17 @@ def get_account(base_url, api_version, headers, account_id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def update_account(base_url, api_version, headers, account_id, update_data):
     """
     Update the details of a specific account.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -64,16 +68,17 @@ def update_account(base_url, api_version, headers, account_id, update_data):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def get_all_accounts(base_url, api_version, headers):
     """
     Retrieve details of all accounts.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -85,16 +90,17 @@ def get_all_accounts(base_url, api_version, headers):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def get_account_configuration(base_url, api_version, headers, account_id):
     """
     Retrieve configuration settings for a specific account.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -107,16 +113,17 @@ def get_account_configuration(base_url, api_version, headers, account_id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def update_account_configuration(base_url, api_version, headers, account_id, config_data):
     """
     Update the configuration settings of a specific account.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -130,16 +137,17 @@ def update_account_configuration(base_url, api_version, headers, account_id, con
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def get_account_activities(base_url, api_version, headers, account_id):
     """
     Retrieve account activities.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -152,16 +160,17 @@ def get_account_activities(base_url, api_version, headers, account_id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def get_account_activities_by_type(base_url, api_version, headers, account_id, activity_type):
     """
     Retrieve account activities filtered by activity type.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -175,16 +184,17 @@ def get_account_activities_by_type(base_url, api_version, headers, account_id, a
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def create_funding_account(base_url, api_version, headers, account_id, funding_data):
     """
     Create a new funding account for a specific account.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -198,16 +208,17 @@ def create_funding_account(base_url, api_version, headers, account_id, funding_d
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def get_ach_relationships(base_url, api_version, headers, account_id):
     """
     Retrieve ACH relationships for a specific account.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -220,16 +231,17 @@ def get_ach_relationships(base_url, api_version, headers, account_id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def delete_ach_relationship(base_url, api_version, headers, account_id, ach_relationship_id):
     """
     Delete an ACH relationship for a specific account.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -243,16 +255,17 @@ def delete_ach_relationship(base_url, api_version, headers, account_id, ach_rela
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def initiate_ach_transfer(base_url, api_version, headers, account_id, transfer_data):
     """
     Initiate an ACH transfer for a specific account.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -266,16 +279,17 @@ def initiate_ach_transfer(base_url, api_version, headers, account_id, transfer_d
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def get_ach_transfers(base_url, api_version, headers, account_id):
     """
     Retrieve ACH transfers for a specific account.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -288,16 +302,17 @@ def get_ach_transfers(base_url, api_version, headers, account_id):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None
+
 
 def cancel_ach_transfer(base_url, api_version, headers, account_id, transfer_id):
     """
     Cancel an ACH transfer for a specific account.
-    
+
     :param base_url: Base URL for the API
     :param api_version: API version to use
     :param headers: Headers including authorization
@@ -311,8 +326,8 @@ def cancel_ach_transfer(base_url, api_version, headers, account_id, transfer_id)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as err:
-        logging.error(f"HTTP error occurred: {err}")
+        logging.exception(f"HTTP error occurred: {err}")
         return None
     except Exception as err:
-        logging.error(f"An error occurred: {err}")
+        logging.exception(f"An error occurred: {err}")
         return None

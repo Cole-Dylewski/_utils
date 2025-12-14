@@ -7,7 +7,6 @@ Generates secure random credentials for application deployment.
 import logging
 import secrets
 import string
-from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -141,8 +140,8 @@ class CredentialGenerator:
     @staticmethod
     def generate_database_credentials(
         password_length: int = 32,
-        username: Optional[str] = None,
-    ) -> Dict[str, str]:
+        username: str | None = None,
+    ) -> dict[str, str]:
         """
         Generate database credentials.
 
@@ -177,7 +176,7 @@ class CredentialGenerator:
         api_key_length: int = 64,
         jwt_secret_length: int = 64,
         encryption_key_bytes: int = 32,
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         """
         Generate all common application credentials.
 
@@ -200,9 +199,7 @@ class CredentialGenerator:
                 include_special=False,
                 exclude_chars="\"'\\",
             ),
-            "jwt_secret": CredentialGenerator.generate_jwt_secret(
-                length=jwt_secret_length
-            ),
+            "jwt_secret": CredentialGenerator.generate_jwt_secret(length=jwt_secret_length),
             "encryption_key": CredentialGenerator.generate_encryption_key(
                 length=encryption_key_bytes
             ),
@@ -211,4 +208,3 @@ class CredentialGenerator:
 
         logger.info(f"Generated {len(credentials)} credentials")
         return credentials
-

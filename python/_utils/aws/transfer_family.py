@@ -1,9 +1,7 @@
-import json
 import logging
 import time
-from typing import Optional, Union, Dict, Any, List
+from typing import Any
 
-import boto3
 from botocore.exceptions import ClientError
 
 from _utils.aws import boto3_session, s3, secrets
@@ -13,17 +11,18 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 """
 WORK TO DO:
-UPDATE CREATE USER TO VALIDATE IF CLIENT S3 FOLDER EXISTS, AND THEN CREATE IF IT DOESNT AND PLACE INTO 
+UPDATE CREATE USER TO VALIDATE IF CLIENT S3 FOLDER EXISTS, AND THEN CREATE IF IT DOESNT AND PLACE INTO
 """
-
 
 
 class TransferServerException(Exception):
     """Custom exception for AWS Transfer Family server errors."""
+
     def __init__(self, server_id, message="Transfer Family Server operation failed."):
         self.server_id = server_id
         self.message = f"Server {server_id}: {message}"
         super().__init__(self.message)
+
 
 class TransferFamilyHandler:
     """
@@ -35,10 +34,10 @@ class TransferFamilyHandler:
         self,
         aws_access_key_id=None,
         aws_secret_access_key=None,
-        region_name='us-east-1',
-        session=None
+        region_name="us-east-1",
+        session=None,
     ):
-        self.region = region_name or 'us-east-1'
+        self.region = region_name or "us-east-1"
 
         # Initialize AWS session
         if session:
@@ -47,16 +46,16 @@ class TransferFamilyHandler:
             self.session = boto3_session.Session(
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key,
-                region_name=self.region
+                region_name=self.region,
             )
 
         logger.info(f"TransferFamilyHandler initialized in region: {self.region}")
 
         # Create Transfer Family client
         self.transfer_client = self.session.client(
-            'transfer',
+            "transfer",
             region_name=self.region,
-            endpoint_url=f'https://transfer.{self.region}.amazonaws.com'
+            endpoint_url=f"https://transfer.{self.region}.amazonaws.com",
         )
 
         # Optional other handlers
@@ -69,42 +68,39 @@ class TransferFamilyHandler:
 
     def create_server(
         self,
-        endpoint_type: str = 'PUBLIC',
-        identity_provider_type: str = 'SERVICE_MANAGED',
-        protocols: Optional[List[str]] = None,
-        logging_role: Optional[str] = None,
-        tags: Optional[List[Dict[str, str]]] = None,
-        endpoint_details: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        endpoint_type: str = "PUBLIC",
+        identity_provider_type: str = "SERVICE_MANAGED",
+        protocols: list[str] | None = None,
+        logging_role: str | None = None,
+        tags: list[dict[str, str]] | None = None,
+        endpoint_details: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
         Creates a new Transfer Family SFTP Server.
         """
         logger.info(f"Creating Transfer Family server with endpoint type: {endpoint_type}")
 
-        params = {
-            'EndpointType': endpoint_type,
-            'IdentityProviderType': identity_provider_type
-        }
+        params = {"EndpointType": endpoint_type, "IdentityProviderType": identity_provider_type}
 
         if protocols:
-            params['Protocols'] = protocols
+            params["Protocols"] = protocols
 
         if logging_role:
-            params['LoggingRole'] = logging_role
+            params["LoggingRole"] = logging_role
 
         if tags:
-            params['Tags'] = tags
+            params["Tags"] = tags
 
         if endpoint_details:
-            params['EndpointDetails'] = endpoint_details
+            params["EndpointDetails"] = endpoint_details
 
         try:
             response = self.transfer_client.create_server(**params)
-            server_id = response.get('ServerId')
+            server_id = response.get("ServerId")
             logger.info(f"Transfer Family server created successfully: {server_id}")
             return response
         except ClientError as e:
-            logger.error(f"Failed to create Transfer Family server: {e}")
+            logger.exception(f"Failed to create Transfer Family server: {e}")
             raise
 
     def delete_server(self, server_id: str):
@@ -118,10 +114,10 @@ class TransferFamilyHandler:
             logger.info(f"Transfer Family server {server_id} deleted successfully")
             return response
         except ClientError as e:
-            logger.error(f"Failed to delete server {server_id}: {e}")
+            logger.exception(f"Failed to delete server {server_id}: {e}")
             raise
 
-    def describe_server(self, server_id: str) -> Dict[str, Any]:
+    def describe_server(self, server_id: str) -> dict[str, Any]:
         """
         Describes a Transfer Family server.
         """
@@ -132,10 +128,10 @@ class TransferFamilyHandler:
             logger.info(f"Server description retrieved for: {server_id}")
             return response
         except ClientError as e:
-            logger.error(f"Failed to describe server {server_id}: {e}")
+            logger.exception(f"Failed to describe server {server_id}: {e}")
             raise
 
-    def list_servers(self) -> List[Dict[str, Any]]:
+    def list_servers(self) -> list[dict[str, Any]]:
         """
         Lists all Transfer Family servers in the account.
         """
@@ -143,42 +139,42 @@ class TransferFamilyHandler:
 
         try:
             response = self.transfer_client.list_servers()
-            servers = response.get('Servers', [])
+            servers = response.get("Servers", [])
             logger.info(f"Found {len(servers)} Transfer Family servers")
             return servers
         except ClientError as e:
-            logger.error(f"Failed to list Transfer Family servers: {e}")
+            logger.exception(f"Failed to list Transfer Family servers: {e}")
             raise
 
     def update_server(
         self,
         server_id: str,
-        endpoint_type: Optional[str] = None,
-        logging_role: Optional[str] = None,
-        protocols: Optional[List[str]] = None
+        endpoint_type: str | None = None,
+        logging_role: str | None = None,
+        protocols: list[str] | None = None,
     ):
         """
         Updates an existing Transfer Family server.
         """
         logger.info(f"Updating Transfer Family server: {server_id}")
 
-        update_params = {'ServerId': server_id}
+        update_params = {"ServerId": server_id}
 
         if endpoint_type:
-            update_params['EndpointType'] = endpoint_type
+            update_params["EndpointType"] = endpoint_type
 
         if logging_role:
-            update_params['LoggingRole'] = logging_role
+            update_params["LoggingRole"] = logging_role
 
         if protocols:
-            update_params['Protocols'] = protocols
+            update_params["Protocols"] = protocols
 
         try:
             response = self.transfer_client.update_server(**update_params)
             logger.info(f"Transfer Family server {server_id} updated successfully")
             return response
         except ClientError as e:
-            logger.error(f"Failed to update Transfer Family server {server_id}: {e}")
+            logger.exception(f"Failed to update Transfer Family server {server_id}: {e}")
             raise
 
     # -------------------------------------
@@ -190,10 +186,10 @@ class TransferFamilyHandler:
         user_name: str,
         server_id: str,
         role: str,
-        client_name: Optional[str] = None,
+        client_name: str | None = None,
         bucket_name: str = "",
-        ssh_key_pair: Optional[Dict[str, str]] = None,
-        tags: Optional[List[Dict[str, str]]] = None,
+        ssh_key_pair: dict[str, str] | None = None,
+        tags: list[dict[str, str]] | None = None,
     ):
         """
         Creates a Transfer Family user locked to their S3 subfolder but with '/' as their visible root.
@@ -220,12 +216,13 @@ class TransferFamilyHandler:
             self.s3_handler.send_to_s3(
                 data=f"Auto-created placeholder for {client_name}",
                 bucket=bucket_name,
-                s3_file_name=f"{s3_prefix}{client_name}_placeholder.txt"
+                s3_file_name=f"{s3_prefix}{client_name}_placeholder.txt",
             )
 
         # Step 2: Generate SSH keys if not passed in
         if ssh_key_pair is None:
             from _utils.utils import cryptography
+
             logger.info(f"Generating SSH keypair for client {client_name}")
             ssh_key_pair = cryptography.gen_rsa_keys(
                 key_size=2048,
@@ -233,7 +230,7 @@ class TransferFamilyHandler:
                 region_name=self.region,
                 secret_name=f"{client_name}_sftp_key",
                 save_location="s3",
-                client=client_name
+                client=client_name,
             )
         public_key = ssh_key_pair["public_key"]
         private_key = ssh_key_pair["private_key"]
@@ -247,10 +244,10 @@ class TransferFamilyHandler:
             "HomeDirectoryType": "LOGICAL",
             "HomeDirectoryMappings": [
                 {
-                    "Entry": "/",             # user sees root
-                    "Target": s3_full_path    # actually maps to their S3 folder
+                    "Entry": "/",  # user sees root
+                    "Target": s3_full_path,  # actually maps to their S3 folder
                 }
-            ]
+            ],
         }
 
         if tags:
@@ -264,7 +261,7 @@ class TransferFamilyHandler:
             if "UserAlreadyExists" in str(e):
                 logger.warning(f"User {user_name} already exists on {server_id}")
             else:
-                logger.error(f"Failed to create Transfer Family user {user_name}: {e}")
+                logger.exception(f"Failed to create Transfer Family user {user_name}: {e}")
                 raise
 
         # Return response & private key
@@ -283,34 +280,28 @@ class TransferFamilyHandler:
         logger.info(f"Deleting user {user_name} from server {server_id}")
 
         try:
-            response = self.transfer_client.delete_user(
-                ServerId=server_id,
-                UserName=user_name
-            )
+            response = self.transfer_client.delete_user(ServerId=server_id, UserName=user_name)
             logger.info(f"User {user_name} deleted successfully from server {server_id}")
             return response
         except ClientError as e:
-            logger.error(f"Failed to delete user {user_name} from server {server_id}: {e}")
+            logger.exception(f"Failed to delete user {user_name} from server {server_id}: {e}")
             raise
 
-    def describe_user(self, server_id: str, user_name: str) -> Dict[str, Any]:
+    def describe_user(self, server_id: str, user_name: str) -> dict[str, Any]:
         """
         Describes a user on a Transfer Family server.
         """
         logger.info(f"Describing user {user_name} on server {server_id}")
 
         try:
-            response = self.transfer_client.describe_user(
-                ServerId=server_id,
-                UserName=user_name
-            )
+            response = self.transfer_client.describe_user(ServerId=server_id, UserName=user_name)
             logger.info(f"User description retrieved for {user_name} on server {server_id}")
             return response
         except ClientError as e:
-            logger.error(f"Failed to describe user {user_name} on server {server_id}: {e}")
+            logger.exception(f"Failed to describe user {user_name} on server {server_id}: {e}")
             raise
 
-    def list_users(self, server_id: str) -> List[Dict[str, Any]]:
+    def list_users(self, server_id: str) -> list[dict[str, Any]]:
         """
         Lists all users on a Transfer Family server.
         """
@@ -318,11 +309,11 @@ class TransferFamilyHandler:
 
         try:
             response = self.transfer_client.list_users(ServerId=server_id)
-            users = response.get('Users', [])
+            users = response.get("Users", [])
             logger.info(f"Found {len(users)} users on server {server_id}")
             return users
         except ClientError as e:
-            logger.error(f"Failed to list users on server {server_id}: {e}")
+            logger.exception(f"Failed to list users on server {server_id}: {e}")
             raise
 
     # -------------------------------------
@@ -332,9 +323,9 @@ class TransferFamilyHandler:
     def wait_for_server_state(
         self,
         server_id: str,
-        desired_state: str = 'ONLINE',
+        desired_state: str = "ONLINE",
         wait_interval: int = 15,
-        timeout: int = 600
+        timeout: int = 600,
     ):
         """
         Waits for a Transfer Family server to reach a desired state.
@@ -346,7 +337,7 @@ class TransferFamilyHandler:
         while time.time() - start_time < timeout:
             try:
                 response = self.describe_server(server_id)
-                state = response['Server']['State']
+                state = response["Server"]["State"]
                 logger.info(f"Current state of server {server_id}: {state}")
 
                 if state == desired_state:
@@ -355,12 +346,11 @@ class TransferFamilyHandler:
 
                 time.sleep(wait_interval)
             except ClientError as e:
-                logger.error(f"Error while waiting for server {server_id} state: {e}")
+                logger.exception(f"Error while waiting for server {server_id} state: {e}")
                 raise
 
         raise TransferServerException(
-            server_id,
-            message=f"Timed out waiting for server to reach state {desired_state}"
+            server_id, message=f"Timed out waiting for server to reach state {desired_state}"
         )
 
     def reset_password(self, server_id: str, user_name: str, new_ssh_public_key_body: str):
@@ -377,33 +367,32 @@ class TransferFamilyHandler:
         try:
             # Step 1: List all existing SSH keys
             response = self.transfer_client.list_ssh_public_keys(
-                ServerId=server_id,
-                UserName=user_name
+                ServerId=server_id, UserName=user_name
             )
-            existing_keys = response.get('SshPublicKeys', [])
-            logger.info(f"Found {len(existing_keys)} existing SSH public key(s) for user {user_name}")
+            existing_keys = response.get("SshPublicKeys", [])
+            logger.info(
+                f"Found {len(existing_keys)} existing SSH public key(s) for user {user_name}"
+            )
 
             # Step 2: Delete all existing SSH keys
             for key in existing_keys:
-                ssh_key_id = key['SshPublicKeyId']
+                ssh_key_id = key["SshPublicKeyId"]
                 logger.info(f"Deleting existing SSH key {ssh_key_id} for user {user_name}")
                 self.transfer_client.delete_ssh_public_key(
-                    ServerId=server_id,
-                    UserName=user_name,
-                    SshPublicKeyId=ssh_key_id
+                    ServerId=server_id, UserName=user_name, SshPublicKeyId=ssh_key_id
                 )
 
             # Step 3: Import the new SSH public key
             logger.info(f"Importing new SSH public key for user {user_name}")
             import_response = self.transfer_client.import_ssh_public_key(
-                ServerId=server_id,
-                UserName=user_name,
-                SshPublicKeyBody=new_ssh_public_key_body
+                ServerId=server_id, UserName=user_name, SshPublicKeyBody=new_ssh_public_key_body
             )
 
             logger.info(f"SSH public key reset successfully for user {user_name}")
             return import_response
 
         except ClientError as e:
-            logger.error(f"Failed to reset SSH public key for user {user_name} on server {server_id}: {e}")
+            logger.exception(
+                f"Failed to reset SSH public key for user {user_name} on server {server_id}: {e}"
+            )
             raise

@@ -7,16 +7,16 @@ Supports multiple applications, environments, and idempotent operations.
 
 import argparse
 import logging
-import sys
 from pathlib import Path
+import sys
 
 # Add the parent directory to sys.path to allow importing _utils
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from _utils.server_management.app_deployment import (
-    ServerConfig,
     Credentials,
     EnvironmentType,
+    ServerConfig,
     VaultConfig,
 )
 from _utils.server_management.app_registry import AppRegistry
@@ -113,7 +113,7 @@ Examples:
     creds_group = parser.add_argument_group(
         "Credentials",
         "Credentials are automatically generated and stored in Vault. "
-        "Only provide these if you need to override defaults."
+        "Only provide these if you need to override defaults.",
     )
     creds_group.add_argument(
         "--api-key",
@@ -132,7 +132,7 @@ Examples:
     vault_group = parser.add_argument_group(
         "Vault Configuration",
         "Vault configuration is auto-detected from server if not provided. "
-        "Token is retrieved from terraform@chubcity-master at ~/.vault-root-token or can be provided manually."
+        "Token is retrieved from terraform@chubcity-master at ~/.vault-root-token or can be provided manually.",
     )
     vault_group.add_argument(
         "--vault-addr",
@@ -167,7 +167,7 @@ Examples:
     repo_group = parser.add_argument_group(
         "Repository Configuration",
         "Repository URL is automatically determined from app selection. "
-        "Only override if using a different repository."
+        "Only override if using a different repository.",
     )
     repo_group.add_argument(
         "--app-repo-url",
@@ -253,7 +253,7 @@ Examples:
         "GPU Configuration",
         "vLLM services are enabled by default for IPSA deployments. "
         "If GPU memory limits are not specified, they will be auto-detected and allocated "
-        "automatically (80% to AI services, 20% to others)."
+        "automatically (80% to AI services, 20% to others).",
     )
     gpu_group.add_argument(
         "--disable-vllm",
@@ -285,7 +285,7 @@ Examples:
     # Tailscale Configuration
     tailscale_group = parser.add_argument_group(
         "Tailscale Configuration",
-        "Tailscale auth key is automatically retrieved from Vault during deployment."
+        "Tailscale auth key is automatically retrieved from Vault during deployment.",
     )
     tailscale_group.add_argument(
         "--enable-tailscale",
@@ -307,7 +307,7 @@ Examples:
         metavar="KEY=VALUE",
         help="Application-specific argument (can be specified multiple times)",
     )
-    
+
     # Deployment options
     parser.add_argument(
         "--skip-validation",
@@ -376,7 +376,7 @@ def create_config_from_args(args: argparse.Namespace) -> object:
         # Auto-detect Vault configuration from server
         logger.info("Auto-detecting Vault configuration from server...")
         from _utils.server_management.vault_auto_config import auto_configure_vault
-        
+
         vault_addr, vault_token = auto_configure_vault(
             host=args.server_host,
             user=args.server_user,
@@ -387,7 +387,7 @@ def create_config_from_args(args: argparse.Namespace) -> object:
             vault_token_host=getattr(args, "vault_token_host", None),
             vault_token_user=getattr(args, "vault_token_user", None),
         )
-        
+
         if vault_addr:
             vault_config = VaultConfig(
                 vault_addr=vault_addr,
@@ -398,14 +398,20 @@ def create_config_from_args(args: argparse.Namespace) -> object:
                 logger.info("[OK] Vault configuration auto-detected successfully")
             else:
                 logger.warning("⚠ Vault address detected but token not found.")
-                logger.warning(f"  Token should be in: ~/.vault-root-token on terraform@chubcity-master")
-                logger.warning("  Deployment will attempt to retrieve token during Vault operations.")
+                logger.warning(
+                    "  Token should be in: ~/.vault-root-token on terraform@chubcity-master"
+                )
+                logger.warning(
+                    "  Deployment will attempt to retrieve token during Vault operations."
+                )
         else:
             logger.error("✗ Could not auto-detect Vault configuration.")
             logger.error("  Please provide --vault-addr and --vault-token manually, or ensure:")
             logger.error("  1. Tailscale is installed and configured on the server")
             logger.error("  2. Vault is accessible via Tailscale network")
-            logger.error("  3. Vault token is available at ~/.vault-root-token on terraform@chubcity-master")
+            logger.error(
+                "  3. Vault token is available at ~/.vault-root-token on terraform@chubcity-master"
+            )
 
     # Credentials are auto-generated, so start with empty credentials
     credentials = Credentials(
@@ -418,8 +424,12 @@ def create_config_from_args(args: argparse.Namespace) -> object:
 
     # Use provided values or defaults
     # Path defaults to /opt/{app_name} if not provided
-    default_path = args.app_repo_path if hasattr(args, "app_repo_path") and args.app_repo_path else f"/opt/{args.app}"
-    
+    default_path = (
+        args.app_repo_path
+        if hasattr(args, "app_repo_path") and args.app_repo_path
+        else f"/opt/{args.app}"
+    )
+
     # Create temporary config instance to get app-specific defaults
     # This allows us to use the default repo URL from the app config
     temp_config = config_class(
@@ -430,7 +440,7 @@ def create_config_from_args(args: argparse.Namespace) -> object:
         app_repo_path=default_path,  # Provide path to avoid validation error
         vault_config=vault_config,
     )
-    
+
     # Use provided values or defaults from app config
     config_kwargs = {
         "server": server,
@@ -438,7 +448,9 @@ def create_config_from_args(args: argparse.Namespace) -> object:
         "environment": environment,
         "app_name": args.app,
         "app_repo_url": args.app_repo_url if args.app_repo_url else temp_config.app_repo_url,
-        "app_repo_branch": args.app_repo_branch if args.app_repo_branch else temp_config.app_repo_branch,
+        "app_repo_branch": args.app_repo_branch
+        if args.app_repo_branch
+        else temp_config.app_repo_branch,
         "app_repo_path": temp_config.app_repo_path,  # Use from temp_config (which has default from IPSAAppConfig)
         "vault_config": vault_config,
         "terraform_dir": args.terraform_dir,
@@ -457,7 +469,7 @@ def create_config_from_args(args: argparse.Namespace) -> object:
     # vLLM is enabled by default, but can be disabled with --disable-vllm
     if hasattr(args, "enable_vllm"):
         config_kwargs["enable_vllm"] = args.enable_vllm
-    
+
     # Add Tailscale configuration if provided
     if hasattr(args, "enable_tailscale"):
         config_kwargs["enable_tailscale"] = args.enable_tailscale
@@ -476,23 +488,24 @@ def main() -> int:
     if not args.skip_validation and not args.destroy:
         logger.info("Running pre-deployment server validation...")
         from _utils.server_management.app_deployment import ServerConfig
-        
+
         server = ServerConfig(
             host=args.server_host,
             user=args.server_user,
             port=args.server_port,
             ssh_key_path=args.ssh_key_path,
         )
-        
+
         # Import and run validation
         validate_script = Path(__file__).parent / "validate_server.py"
         if validate_script.exists():
             import importlib.util
+
             spec = importlib.util.spec_from_file_location("validate_server", validate_script)
             validate_module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(validate_module)
-            
-            is_valid, errors = validate_module.validate_server(server, args.app)
+
+            is_valid, _errors = validate_module.validate_server(server, args.app)
             if not is_valid:
                 logger.error("Server validation failed. Fix the issues above before deploying.")
                 logger.error("To skip validation, use --skip-validation (not recommended)")
@@ -518,9 +531,7 @@ def main() -> int:
             logger.info(f"Destroying {args.app} deployment ({args.environment})...")
             success = manager.destroy()
         else:
-            logger.info(
-                f"Deploying {args.app} to {args.environment} environment..."
-            )
+            logger.info(f"Deploying {args.app} to {args.environment} environment...")
             success = manager.deploy(
                 skip_infrastructure=args.skip_infrastructure,
                 load_vault_creds=not args.skip_load_vault,
@@ -532,24 +543,24 @@ def main() -> int:
 
         if success:
             logger.info("Deployment operation completed successfully")
-            print("\n" + "="*80)
+            print("\n" + "=" * 80)
             print("DEPLOYMENT COMPLETED SUCCESSFULLY")
-            print("="*80 + "\n")
-            
+            print("=" * 80 + "\n")
+
             # Print service diagnostics
-            if hasattr(manager, 'print_service_diagnostics'):
+            if hasattr(manager, "print_service_diagnostics"):
                 try:
                     manager.print_service_diagnostics()
                 except Exception as e:
                     logger.warning(f"Failed to print service diagnostics: {e}")
         else:
             logger.error("Deployment operation failed")
-            print("\n" + "="*80)
+            print("\n" + "=" * 80)
             print("DEPLOYMENT FAILED")
-            print("="*80 + "\n")
-            
+            print("=" * 80 + "\n")
+
             # Print diagnostics even on failure
-            if hasattr(manager, 'print_service_diagnostics'):
+            if hasattr(manager, "print_service_diagnostics"):
                 try:
                     logger.info("Gathering service diagnostics...")
                     manager.print_service_diagnostics()
@@ -558,32 +569,33 @@ def main() -> int:
 
         # Flush all output to ensure it's written
         import sys
+
         sys.stdout.flush()
         sys.stderr.flush()
-        
+
         return 0 if success else 1
 
     except ValueError as e:
-        logger.error(f"Configuration error: {e}")
-        print("\n" + "="*80)
+        logger.exception(f"Configuration error: {e}")
+        print("\n" + "=" * 80)
         print(f"CONFIGURATION ERROR: {e}")
-        print("="*80 + "\n")
+        print("=" * 80 + "\n")
         sys.stdout.flush()
         sys.stderr.flush()
         return 1
     except KeyboardInterrupt:
         logger.warning("Deployment interrupted by user")
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("DEPLOYMENT INTERRUPTED BY USER")
-        print("="*80 + "\n")
+        print("=" * 80 + "\n")
         sys.stdout.flush()
         sys.stderr.flush()
         return 130
     except Exception as e:
         logger.error(f"Deployment failed: {e}", exc_info=True)
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print(f"DEPLOYMENT FAILED: {e}")
-        print("="*80 + "\n")
+        print("=" * 80 + "\n")
         sys.stdout.flush()
         sys.stderr.flush()
         return 1
@@ -601,4 +613,3 @@ if __name__ == "__main__":
         sys.stdout.flush()
         sys.stderr.flush()
         sys.exit(130)
-

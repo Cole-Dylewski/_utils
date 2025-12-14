@@ -1,0 +1,5 @@
+# Tableau dependencies
+# Install with: pip install -r requirements-tableau.txt
+# Or use: pip install -e ".[tableau]"
+
+tableauserverclient>=0.26

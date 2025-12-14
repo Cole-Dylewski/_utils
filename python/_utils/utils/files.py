@@ -1,7 +1,9 @@
 import os
 import re
 import unicodedata
+
 import pandas as pd
+
 
 def to_filename_compatible_string(s: str) -> str:
     """
@@ -12,18 +14,20 @@ def to_filename_compatible_string(s: str) -> str:
     - Removes all non-alphanumeric characters except hyphens and dots
     - Strips leading/trailing hyphens and dots
     """
-    s = unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode('ascii')  # Remove accents and special chars
+    s = (
+        unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
+    )  # Remove accents and special chars
     s = s.lower()  # Lowercase for consistency
-    s = re.sub(r'[\s_]+', '-', s)  # Normalize spaces and underscores to hyphens
-    s = re.sub(r'[^a-z0-9\.-]', '', s)  # Remove invalid filename characters
-    s = s.strip('-.')  # Remove leading/trailing delimiters
-    return s
+    s = re.sub(r"[\s_]+", "-", s)  # Normalize spaces and underscores to hyphens
+    s = re.sub(r"[^a-z0-9\.-]", "", s)  # Remove invalid filename characters
+    return s.strip("-.")  # Remove leading/trailing delimiters
+
 
 def merge_files(outputFilePath, filesGenerated, resize=False, delete=True):
     """
     Merges a list of files into a single output file.
     Supports PDF, CSV, and PNG output types.
-    
+
     Parameters:
     - outputFilePath: Path to the final merged file
     - filesGenerated: List of input file paths to merge
@@ -32,25 +36,29 @@ def merge_files(outputFilePath, filesGenerated, resize=False, delete=True):
     """
     outputFileExt = os.path.splitext(outputFilePath)[1].lower()
 
-    if outputFileExt == '.pdf':
+    if outputFileExt == ".pdf":
         # Merge PDFs using PyPDF2
         import PyPDF2
+
         merger = PyPDF2.PdfMerger()
         for file_name in filesGenerated:
             merger.append(file_name)
         merger.write(outputFilePath)
         merger.close()
 
-    elif outputFileExt == '.csv':
+    elif outputFileExt == ".csv":
         # Concatenate CSVs into a single DataFrame, preserving string formatting
         df = pd.DataFrame()
         for file_name in filesGenerated:
-            df = pd.concat([df, pd.read_csv(file_name, dtype=str, low_memory=False)], ignore_index=True)
+            df = pd.concat(
+                [df, pd.read_csv(file_name, dtype=str, low_memory=False)], ignore_index=True
+            )
         df.to_csv(outputFilePath, index=False)
 
-    elif outputFileExt == '.png':
+    elif outputFileExt == ".png":
         # Vertically stack PNG images using PIL
         from PIL import Image
+
         images = {}
         totalHeight = 0
         maxWidth = 0
@@ -70,7 +78,7 @@ def merge_files(outputFilePath, filesGenerated, resize=False, delete=True):
 
     else:
         # Unsupported file extension
-        raise ValueError(f'Unsupported output file type: {outputFileExt}')
+        raise ValueError(f"Unsupported output file type: {outputFileExt}")
 
     if delete:
         # Optionally delete the original files

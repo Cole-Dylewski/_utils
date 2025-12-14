@@ -1,17 +1,17 @@
 # app/clients/snowpark_client.py
 from __future__ import annotations
 
-import os
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union, Callable
+import os
+from typing import Any, Optional
 
-from snowflake.snowpark import Session, DataFrame
-from snowflake.snowpark import types as spt
+from snowflake.snowpark import DataFrame, Session
 from snowflake.snowpark import functions as F
+from snowflake.snowpark import types as spt
 
-
-ConfigDict = Dict[str, Any]
-SqlParams = Optional[Union[Sequence[Any], Dict[str, Any]]]
+ConfigDict = dict[str, Any]
+SqlParams = Optional[Sequence[Any] | dict[str, Any]]
 
 
 @dataclass
@@ -29,12 +29,13 @@ class SnowparkClient:
             rows = df.collect()
             print(rows)
     """
+
     configs: ConfigDict
-    _session: Optional[Session] = field(default=None, init=False, repr=False)
+    _session: Session | None = field(default=None, init=False, repr=False)
 
     # ---------- Construction ----------
     @staticmethod
-    def from_env(prefix: str = "SNOWFLAKE_") -> "SnowparkClient":
+    def from_env(prefix: str = "SNOWFLAKE_") -> SnowparkClient:
         """
         Build a client from environment variables. Expected keys with given prefix:
           ACCOUNT, USER, PASSWORD (or AUTHENTICATOR/OAUTH), ROLE, WAREHOUSE, DATABASE, SCHEMA
@@ -63,7 +64,7 @@ class SnowparkClient:
         return SnowparkClient(cfg)
 
     # ---------- Context manager ----------
-    def __enter__(self) -> "SnowparkClient":
+    def __enter__(self) -> SnowparkClient:
         self._ensure_session()
         return self
 
@@ -95,7 +96,7 @@ class SnowparkClient:
         *,
         collect: bool = True,
         to_pandas: bool = False,
-    ) -> Union[List[Any], DataFrame, "pandas.DataFrame"]:
+    ) -> list[Any] | DataFrame | pandas.DataFrame:
         """
         Execute arbitrary SQL.
 
@@ -121,8 +122,8 @@ class SnowparkClient:
 
     def create_dataframe(
         self,
-        data: Union[Iterable[Tuple[Any, ...]], Iterable[Dict[str, Any]]],
-        schema: Optional[Union[spt.StructType, List[str]]] = None,
+        data: Iterable[tuple[Any, ...]] | Iterable[dict[str, Any]],
+        schema: spt.StructType | list[str] | None = None,
     ) -> DataFrame:
         """
         Create a Snowpark DataFrame from local data.
@@ -138,9 +139,9 @@ class SnowparkClient:
         table_name: str,
         mode: str = "append",
         *,
-        overwrite: Optional[bool] = None,
+        overwrite: bool | None = None,
         column_order: str = "name",
-        create_table_column_types: Optional[Dict[str, spt.DataType]] = None,
+        create_table_column_types: dict[str, spt.DataType] | None = None,
     ) -> None:
         """
         Save a Snowpark DataFrame to a table.
@@ -162,7 +163,7 @@ class SnowparkClient:
 
     def write_pandas(
         self,
-        pdf: "pandas.DataFrame",
+        pdf: pandas.DataFrame,
         table_name: str,
         *,
         overwrite: bool = False,
@@ -187,6 +188,7 @@ class SnowparkClient:
 
         # Fallback to connector helper
         from snowflake.connector.pandas_tools import write_pandas  # type: ignore
+
         conn = self.session._conn._conn  # internal, but commonly used for fallback
         write_pandas(
             conn,
@@ -208,11 +210,11 @@ class SnowparkClient:
         return_type: spt.DataType,
         input_types: Sequence[spt.DataType],
         *,
-        name: Optional[str] = None,
+        name: str | None = None,
         replace: bool = True,
         is_permanent: bool = False,
-        stage_location: Optional[str] = None,
-        packages: Optional[Sequence[str]] = None,
+        stage_location: str | None = None,
+        packages: Sequence[str] | None = None,
     ) -> F.UserDefinedFunction:
         """
         Register a Python UDF.
@@ -236,11 +238,11 @@ class SnowparkClient:
         return_type: spt.DataType,
         input_types: Sequence[spt.DataType],
         *,
-        name: Optional[str] = None,
+        name: str | None = None,
         replace: bool = True,
         is_permanent: bool = True,
-        stage_location: Optional[str] = None,
-        packages: Optional[Sequence[str]] = None,
+        stage_location: str | None = None,
+        packages: Sequence[str] | None = None,
         execute_as: str = "owner",
     ) -> F.StoredProcedureRegistration:
         """
@@ -261,7 +263,7 @@ class SnowparkClient:
         )
 
     # ---------- Quality-of-life ----------
-    def to_pandas(self, df: DataFrame, *, timezone: Optional[str] = None) -> "pandas.DataFrame":
+    def to_pandas(self, df: DataFrame, *, timezone: str | None = None) -> pandas.DataFrame:
         """
         Convert a Snowpark DataFrame to pandas. Optionally set timezone for timestamp conversions.
         """
@@ -269,7 +271,7 @@ class SnowparkClient:
             return df.to_pandas(timezone=timezone)
         return df.to_pandas()
 
-    def current(self) -> Dict[str, str]:
+    def current(self) -> dict[str, str]:
         """Return current context (database, schema, role, warehouse)."""
         rows = self.session.sql(
             "select current_database(), current_schema(), current_role(), current_warehouse()"

@@ -3,7 +3,6 @@ Tests for AWS utilities.
 """
 
 import pytest
-from unittest.mock import Mock, patch
 
 
 @pytest.mark.aws
@@ -19,7 +18,8 @@ class TestAWSUtils:
     def test_aws_imports(self):
         """Test that AWS modules can be imported."""
         try:
-            from _utils.aws import s3, secrets, boto3_session
+            from _utils.aws import boto3_session, s3, secrets
+
             assert s3 is not None
             assert secrets is not None
             assert boto3_session is not None
@@ -30,6 +30,7 @@ class TestAWSUtils:
         """Test boto3 session with mocked client."""
         try:
             import boto3
+
             client = boto3.client("s3")
             assert client is not None
         except ImportError:
@@ -42,4 +43,3 @@ class TestAWSUtils:
 def test_aws_integration():
     """Integration test for AWS services - requires AWS credentials."""
     pytest.skip("AWS integration tests require credentials and network access")
-

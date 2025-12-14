@@ -1,15 +1,19 @@
-import requests, time
+import time
+
+import requests
+
 
 def internet_test():
     url = "http://www.google.com"
     timeout = 5
     try:
-        request = requests.get(url, timeout=timeout)
+        requests.get(url, timeout=timeout)
         return True
-    except (requests.ConnectionError, requests.Timeout) as exception:
+    except (requests.ConnectionError, requests.Timeout):
         # print("No internet connection...")
         time.sleep(5)
         return False
+
 
 def fastAPI():
     url = "http://nginx/api/v2"
@@ -18,7 +22,7 @@ def fastAPI():
         request = requests.get(url, timeout=timeout)
         print(request.text)
         return True
-    except (requests.ConnectionError, requests.Timeout) as exception:
+    except (requests.ConnectionError, requests.Timeout):
         # print("No internet connection...")
         time.sleep(5)
         return False

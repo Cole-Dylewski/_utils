@@ -1,9 +1,6 @@
 import json
-import os
-import boto3
-
-
 import logging
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -12,32 +9,30 @@ class SecretHandler:
     """
     Initialize SecretHandler with AWS session and Secrets Manager client.
     """
+
     def __init__(
-        self, 
-        aws_access_key_id=None, 
-        aws_secret_access_key=None, 
+        self,
+        aws_access_key_id=None,
+        aws_secret_access_key=None,
         region_name=None,
-        session = None,):
-          
-            
-        #get aws boto3 session   
+        session=None,
+    ):
+        # get aws boto3 session
         if session:
             self.session = session
         else:
             from _utils.aws import boto3_session
+
             self.session = boto3_session.Session(
-                aws_access_key_id=aws_access_key_id, 
-                aws_secret_access_key=aws_secret_access_key, 
-                region_name=region_name)
-        
-        
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+                region_name=region_name,
+            )
+
         # Initialize Secrets Manager client
-        self.secrets_client = self.session.client(
-            service_name='secretsmanager'
-        )
+        self.secrets_client = self.session.client(service_name="secretsmanager")
         logger.info("Connected to AWS Secrets Manager")
-    
-    
+
     def check_secret_exists(self, secret_name):
         """
         Check if a secret exists in AWS Secrets Manager.
@@ -53,9 +48,9 @@ class SecretHandler:
             logger.info(f"Secret {secret_name} does not exist")
             return False
         except Exception as e:
-            logger.error(f"Error checking if secret {secret_name} exists: {str(e)}")
+            logger.exception(f"Error checking if secret {secret_name} exists: {e!s}")
             raise
-        
+
     def get_secret(self, secret_name, region_name="us-east-1"):
         """
         Retrieve a secret from AWS Secrets Manager.
@@ -65,16 +60,14 @@ class SecretHandler:
         :return: A dictionary containing the secret and its ARN
         """
         # Get the secret value
-        get_secret_value_response = self.secrets_client.get_secret_value(
-            SecretId=secret_name
-        )
+        get_secret_value_response = self.secrets_client.get_secret_value(SecretId=secret_name)
         # Load secret string into a dictionary
-        secret = json.loads(get_secret_value_response['SecretString'])
+        secret = json.loads(get_secret_value_response["SecretString"])
         # Add ARN to the returned secret dictionary
-        secret['ARN'] = get_secret_value_response['ARN']
+        secret["ARN"] = get_secret_value_response["ARN"]
         logger.info(f"Secret {secret_name} retrieved")
         return secret
-    
+
     def create_secret(self, secret_name, secret_value, description=None):
         """
         Create a new secret in AWS Secrets Manager.
@@ -92,13 +85,10 @@ class SecretHandler:
             # Convert the secret_value dict into a JSON string
             secret_string = json.dumps(secret_value)
 
-            params = {
-                'Name': secret_name,
-                'SecretString': secret_string
-            }
+            params = {"Name": secret_name, "SecretString": secret_string}
 
             if description:
-                params['Description'] = description
+                params["Description"] = description
 
             # Create the secret
             response = self.secrets_client.create_secret(**params)
@@ -107,7 +97,7 @@ class SecretHandler:
             return response
 
         except Exception as e:
-            logger.error(f"Failed to create secret {secret_name}: {str(e)}")
+            logger.exception(f"Failed to create secret {secret_name}: {e!s}")
             raise
 
     def update_secret(self, secret_name, updated_secret_value, region_name="us-east-1"):
@@ -124,8 +114,7 @@ class SecretHandler:
 
         # Update the secret
         response = self.secrets_client.update_secret(
-            SecretId=secret_name,
-            SecretString=updated_secret_string
+            SecretId=secret_name, SecretString=updated_secret_string
         )
         logger.info(f"Secret {secret_name} updated")
         return response

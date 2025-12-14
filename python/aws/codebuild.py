@@ -1,9 +1,7 @@
-import boto3
-from boto3.dynamodb.conditions import Key, Attr
-from botocore.exceptions import ClientError
-from botocore.config import Config
-from typing import Dict, Any, List, Optional
 import logging
+
+from botocore.config import Config
+from botocore.exceptions import ClientError
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -12,119 +10,118 @@ logging.basicConfig(level=logging.INFO)
 # Retry configuration for Codebuild operations
 retry_config = Config(retries={"max_attempts": 5, "mode": "standard"})
 
+
 class CodebuildHandler:
     """
     CodebuildHandler with AWS session management, error handling, and logging.
     """
+
     def __init__(
-        self, 
-        aws_access_key_id=None, 
-        aws_secret_access_key=None, 
-        region_name=None,
-        session = None
+        self, aws_access_key_id=None, aws_secret_access_key=None, region_name=None, session=None
     ):
         try:
-            #get aws boto3 session   
+            # get aws boto3 session
             if session:
                 self.session = session
             else:
                 from _utils.aws import boto3_session
-                self.session = boto3_session.Session(
-                    aws_access_key_id=aws_access_key_id, 
-                    aws_secret_access_key=aws_secret_access_key, 
-                    region_name=region_name)
 
-            self.codebuild_client = self.session.client('codebuild', config=retry_config)
-            self.logs_client = self.session.client('logs')
+                self.session = boto3_session.Session(
+                    aws_access_key_id=aws_access_key_id,
+                    aws_secret_access_key=aws_secret_access_key,
+                    region_name=region_name,
+                )
+
+            self.codebuild_client = self.session.client("codebuild", config=retry_config)
+            self.logs_client = self.session.client("logs")
             logger.info("Connected to AWS Codebuild")
         except ClientError as e:
-            logger.error(f"Failed to initialize Codebuild client: {e}")
+            logger.exception(f"Failed to initialize Codebuild client: {e}")
             raise
-        
+
     def get_project_config(self, project_name):
         """
-        Retrieves the configuration of an AWS CodeBuild project.
+            Retrieves the configuration of an AWS CodeBuild project.
 
-    Args:
-        project_name (str): The name of the CodeBuild project to update.
+        Args:
+            project_name (str): The name of the CodeBuild project to update.
 
-        kwargs: Key-value pairs representing the fields to update in the CodeBuild project.
-            Supported keys include:
-                - description (str): A description of the project.
-                - source (dict): Configuration for the project's source repository.
-                    Expected keys:
-                        - type (str): Source type (e.g., "GITHUB", "S3").
-                        - location (str): URL or location of the source.
-                        - gitCloneDepth (int, optional): Depth of the Git clone.
-                        - buildspec (str, optional): Buildspec file path or inline content.
-                        - reportBuildStatus (bool, optional): Whether to report build status.
-                        - insecureSsl (bool, optional): Allow insecure SSL connections.
-                - artifacts (dict): Configuration for build artifacts.
-                    Expected keys:
-                        - type (str): Artifact type (e.g., "S3", "NO_ARTIFACTS").
-                        - files (list, optional): List of file patterns to include.
-                        - discardPaths (bool, optional): Discard path information in the artifact.
-                - environment (dict): Build environment configuration.
-                    Expected keys:
-                        - type (str): Environment type (e.g., "LINUX_CONTAINER").
-                        - image (str): Docker image for the build environment.
-                        - computeType (str): Compute size (e.g., "BUILD_GENERAL1_SMALL").
-                        - environmentVariables (list, optional): List of environment variables.
-                            Each variable is a dict with:
-                                - name (str): Variable name.
-                                - value (str): Variable value.
-                                - type (str, optional): Type ("PLAINTEXT" or "SECRETS_MANAGER").
-                        - privilegedMode (bool, optional): Enable privileged mode.
-                        - imagePullCredentialsType (str, optional): Credentials type for pulling images.
-                - serviceRole (str): The IAM role ARN for CodeBuild to use.
-                - timeoutInMinutes (int): The maximum build timeout, in minutes.
-                - encryptionKey (str): KMS encryption key ARN for encryption.
-                - tags (list): List of tags for the project, each as a key-value pair.
-                    Example: [{"key": "Environment", "value": "Production"}].
-                - vpcConfig (dict): VPC configuration for the build project.
-                    Expected keys:
-                        - vpcId (str): VPC ID.
-                        - subnets (list): List of subnet IDs.
-                        - securityGroupIds (list): List of security group IDs.
-                - badgeEnabled (bool): Whether to enable the project badge.
-                - logsConfig (dict): Configuration for logging.
-                    Expected keys:
-                        - cloudWatchLogs (dict): CloudWatch Logs configuration.
-                            - status (str): "ENABLED" or "DISABLED".
-                        - s3Logs (dict): S3 Logs configuration.
-                            - status (str): "ENABLED" or "DISABLED".
-                            - encryptionDisabled (bool, optional): Whether to disable encryption.
-                - cache (dict): Caching configuration.
-                    Expected keys:
-                        - type (str): Cache type ("NO_CACHE" or "LOCAL").
-                        - modes (list, optional): List of cache modes (e.g., "LOCAL_SOURCE_CACHE").
-                - sourceVersion (str): The source version, such as a branch name or commit hash.
-                - secondarySources (list): List of secondary sources.
-                    Each source is a dict with fields like `type`, `location`, etc.
-                - secondarySourceVersions (list): List of versions for secondary sources.
-                    Each version is a dict with fields like `sourceIdentifier` and `sourceVersion`.
-                - secondaryArtifacts (list): List of configurations for secondary artifacts.
-                - fileSystemLocations (list): List of file system locations.
-                    Each location is a dict with fields like `identifier` and `location`.
-                - buildBatchConfig (dict): Configuration for batch builds.
-                    Expected keys:
-                        - serviceRole (str): The IAM role ARN for batch builds.
-                        - combineArtifacts (bool): Whether to combine artifacts in batch builds.
-                        - restrictions (dict, optional): Restrictions for batch builds.
+            kwargs: Key-value pairs representing the fields to update in the CodeBuild project.
+                Supported keys include:
+                    - description (str): A description of the project.
+                    - source (dict): Configuration for the project's source repository.
+                        Expected keys:
+                            - type (str): Source type (e.g., "GITHUB", "S3").
+                            - location (str): URL or location of the source.
+                            - gitCloneDepth (int, optional): Depth of the Git clone.
+                            - buildspec (str, optional): Buildspec file path or inline content.
+                            - reportBuildStatus (bool, optional): Whether to report build status.
+                            - insecureSsl (bool, optional): Allow insecure SSL connections.
+                    - artifacts (dict): Configuration for build artifacts.
+                        Expected keys:
+                            - type (str): Artifact type (e.g., "S3", "NO_ARTIFACTS").
+                            - files (list, optional): List of file patterns to include.
+                            - discardPaths (bool, optional): Discard path information in the artifact.
+                    - environment (dict): Build environment configuration.
+                        Expected keys:
+                            - type (str): Environment type (e.g., "LINUX_CONTAINER").
+                            - image (str): Docker image for the build environment.
+                            - computeType (str): Compute size (e.g., "BUILD_GENERAL1_SMALL").
+                            - environmentVariables (list, optional): List of environment variables.
+                                Each variable is a dict with:
+                                    - name (str): Variable name.
+                                    - value (str): Variable value.
+                                    - type (str, optional): Type ("PLAINTEXT" or "SECRETS_MANAGER").
+                            - privilegedMode (bool, optional): Enable privileged mode.
+                            - imagePullCredentialsType (str, optional): Credentials type for pulling images.
+                    - serviceRole (str): The IAM role ARN for CodeBuild to use.
+                    - timeoutInMinutes (int): The maximum build timeout, in minutes.
+                    - encryptionKey (str): KMS encryption key ARN for encryption.
+                    - tags (list): List of tags for the project, each as a key-value pair.
+                        Example: [{"key": "Environment", "value": "Production"}].
+                    - vpcConfig (dict): VPC configuration for the build project.
+                        Expected keys:
+                            - vpcId (str): VPC ID.
+                            - subnets (list): List of subnet IDs.
+                            - securityGroupIds (list): List of security group IDs.
+                    - badgeEnabled (bool): Whether to enable the project badge.
+                    - logsConfig (dict): Configuration for logging.
+                        Expected keys:
+                            - cloudWatchLogs (dict): CloudWatch Logs configuration.
+                                - status (str): "ENABLED" or "DISABLED".
+                            - s3Logs (dict): S3 Logs configuration.
+                                - status (str): "ENABLED" or "DISABLED".
+                                - encryptionDisabled (bool, optional): Whether to disable encryption.
+                    - cache (dict): Caching configuration.
+                        Expected keys:
+                            - type (str): Cache type ("NO_CACHE" or "LOCAL").
+                            - modes (list, optional): List of cache modes (e.g., "LOCAL_SOURCE_CACHE").
+                    - sourceVersion (str): The source version, such as a branch name or commit hash.
+                    - secondarySources (list): List of secondary sources.
+                        Each source is a dict with fields like `type`, `location`, etc.
+                    - secondarySourceVersions (list): List of versions for secondary sources.
+                        Each version is a dict with fields like `sourceIdentifier` and `sourceVersion`.
+                    - secondaryArtifacts (list): List of configurations for secondary artifacts.
+                    - fileSystemLocations (list): List of file system locations.
+                        Each location is a dict with fields like `identifier` and `location`.
+                    - buildBatchConfig (dict): Configuration for batch builds.
+                        Expected keys:
+                            - serviceRole (str): The IAM role ARN for batch builds.
+                            - combineArtifacts (bool): Whether to combine artifacts in batch builds.
+                            - restrictions (dict, optional): Restrictions for batch builds.
 
-    Returns:
-        dict: Response from the CodeBuild `update_project` API.
+        Returns:
+            dict: Response from the CodeBuild `update_project` API.
 
-    Raises:
-        ClientError: If the update operation fails.
-        ValueError: If the project is not found or accessible.
-    """
-        
+        Raises:
+            ClientError: If the update operation fails.
+            ValueError: If the project is not found or accessible.
+        """
 
         try:
             # Get the project details
             response = self.codebuild_client.batch_get_projects(names=[project_name])
-            projects = response.get('projects', [])
+            projects = response.get("projects", [])
 
             if not projects:
                 raise ValueError(f"No project found with name: {project_name}")
@@ -132,7 +129,7 @@ class CodebuildHandler:
             project = projects[0]
             # print_nested(project)
             # Map the project details to the update-project format
-            update_project_format = {
+            return {
                 "name": project["name"],
                 "description": project.get("description", ""),
                 "source": project["source"],
@@ -154,17 +151,11 @@ class CodebuildHandler:
                 "buildBatchConfig": project.get("buildBatchConfig", {}),
             }
 
-            return update_project_format
-
         except Exception as e:
             print(f"Error retrieving project: {e}")
             return None
-    
-    def update_codebuild_project_json(
-        self,
-        project_name,
-        **kwargs
-    ):
+
+    def update_codebuild_project_json(self, project_name, **kwargs):
         """
         Updates an AWS CodeBuild project with detailed arguments for subfields.
 
@@ -197,7 +188,7 @@ class CodebuildHandler:
             return response
 
         except ClientError as e:
-            logger.error(f"Failed to update project {project_name}: {e}")
+            logger.exception(f"Failed to update project {project_name}: {e}")
             raise
 
     def update_codebuild_project(
@@ -314,7 +305,9 @@ class CodebuildHandler:
             if environment_privileged_mode is not None:
                 update_params["environment"]["privilegedMode"] = environment_privileged_mode
             if environment_image_pull_credentials_type is not None:
-                update_params["environment"]["imagePullCredentialsType"] = environment_image_pull_credentials_type
+                update_params["environment"]["imagePullCredentialsType"] = (
+                    environment_image_pull_credentials_type
+                )
             if service_role is not None:
                 update_params["serviceRole"] = service_role
             if timeout_in_minutes is not None:
@@ -332,7 +325,9 @@ class CodebuildHandler:
             if logs_s3_status is not None:
                 update_params["logsConfig"]["s3Logs"]["status"] = logs_s3_status
             if logs_s3_encryption_disabled is not None:
-                update_params["logsConfig"]["s3Logs"]["encryptionDisabled"] = logs_s3_encryption_disabled
+                update_params["logsConfig"]["s3Logs"]["encryptionDisabled"] = (
+                    logs_s3_encryption_disabled
+                )
             if cache_type is not None:
                 update_params["cache"]["type"] = cache_type
             if source_version is not None:
@@ -354,7 +349,7 @@ class CodebuildHandler:
             return response
 
         except Exception as e:
-            logger.error(f"Failed to update project {project_name}: {e}")
+            logger.exception(f"Failed to update project {project_name}: {e}")
             raise
 
     def start_build(self, project_name):
@@ -422,5 +417,5 @@ class CodebuildHandler:
             }
 
         except ClientError as e:
-            logger.error(f"Failed to start or monitor build for project {project_name}: {e}")
+            logger.exception(f"Failed to start or monitor build for project {project_name}: {e}")
             raise ValueError("Build could not be started or monitored.") from e

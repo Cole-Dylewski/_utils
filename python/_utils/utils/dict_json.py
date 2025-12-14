@@ -1,7 +1,8 @@
-import json
 import datetime
+
+
 # %%
-def flatten_dict(nested_dict, parent_key='', sep='_'):
+def flatten_dict(nested_dict, parent_key="", sep="_"):
     """
     Recursively flattens a nested dictionary.
 
@@ -18,7 +19,7 @@ def flatten_dict(nested_dict, parent_key='', sep='_'):
             items.update(flatten_dict(value, new_key, sep=sep))
         elif isinstance(value, list):
             # If it's a list, convert it to a comma-separated string
-            items[new_key] = ','.join(str(item) for item in value)
+            items[new_key] = ",".join(str(item) for item in value)
         elif isinstance(value, datetime.datetime):
             # Convert datetime objects to ISO-formatted strings
             items[new_key] = value.isoformat()

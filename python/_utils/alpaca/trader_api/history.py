@@ -1,8 +1,24 @@
 # history.py
-import requests, time
-import logging
+import time
 
-def get_barset(api_key, api_secret, base_url, api_version, symbols, timeframe, start, end='', limit=1000, adjustment='raw', feed='iex', page_token='', premium=False):
+import requests
+
+
+def get_barset(
+    api_key,
+    api_secret,
+    base_url,
+    api_version,
+    symbols,
+    timeframe,
+    start,
+    end="",
+    limit=1000,
+    adjustment="raw",
+    feed="iex",
+    page_token="",
+    premium=False,
+):
     """
     Get barset data for multiple symbols using the requests library.
 
@@ -23,17 +39,14 @@ def get_barset(api_key, api_secret, base_url, api_version, symbols, timeframe, s
     """
     timeout_delay = 1
     url = f"{base_url}/{api_version}/stocks/bars"
-    headers = {
-        "APCA-API-KEY-ID": api_key,
-        "APCA-API-SECRET-KEY": api_secret
-    }
-    symbol_str = ','.join(symbols) if isinstance(symbols, list) else symbols
+    headers = {"APCA-API-KEY-ID": api_key, "APCA-API-SECRET-KEY": api_secret}
+    symbol_str = ",".join(symbols) if isinstance(symbols, list) else symbols
     if not feed or feed is False:
         if premium:
-            feed = 'sip'
+            feed = "sip"
         else:
-            feed = 'iex'
-    
+            feed = "iex"
+
     params = {
         "symbols": symbol_str,
         "timeframe": timeframe,
@@ -42,35 +55,36 @@ def get_barset(api_key, api_secret, base_url, api_version, symbols, timeframe, s
         "limit": limit,
         "adjustment": adjustment,
         "feed": feed,
-        'page_token': page_token
+        "page_token": page_token,
     }
 
     try:
-            response = requests.get(url, headers=headers, params=params)
-            print(response.headers)
-            if response.status_code == 200:
-                data = response.json()
-                # print(data)
-                return data.get('bars', {}), data.get('next_page_token', ''), response.headers
-            
-            elif response.status_code == 429:
-                print("Max limit of API calls per minute reached. Delaying extraction to reset request limit.")
-                time.sleep(timeout_delay)
-                return {}, page_token
-            
-            elif response.status_code == 422:
-                print("Invalid parameters.")
-                print(response.status_code)
-                print(response.content)
-                return {}, None
-            
-            else:
-                print(f"Unexpected error: {response.status_code}")
-                print(response.content)
-                time.sleep(timeout_delay)
-                return {}, page_token
+        response = requests.get(url, headers=headers, params=params)
+        print(response.headers)
+        if response.status_code == 200:
+            data = response.json()
+            # print(data)
+            return data.get("bars", {}), data.get("next_page_token", ""), response.headers
 
-        except Exception as e:
-            print(f"An error occurred: {e}")
+        if response.status_code == 429:
+            print(
+                "Max limit of API calls per minute reached. Delaying extraction to reset request limit."
+            )
             time.sleep(timeout_delay)
             return {}, page_token
+
+        if response.status_code == 422:
+            print("Invalid parameters.")
+            print(response.status_code)
+            print(response.content)
+            return {}, None
+
+        print(f"Unexpected error: {response.status_code}")
+        print(response.content)
+        time.sleep(timeout_delay)
+        return {}, page_token
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        time.sleep(timeout_delay)
+        return {}, page_token

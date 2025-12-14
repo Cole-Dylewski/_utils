@@ -8,15 +8,14 @@ including the Tailscale auth key.
 import argparse
 import logging
 import os
-import sys
 from pathlib import Path
+import sys
 
 # Add the parent directory to sys.path to allow importing _utils
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from _utils.server_management.vault import VaultHandler
 from _utils.server_management.vault_auto_config import (
-    auto_configure_vault,
     detect_vault_addr_via_tailscale,
     retrieve_vault_token_from_server,
 )
@@ -29,12 +28,12 @@ logger = logging.getLogger(__name__)
 
 
 def check_tailscale_key(
-    vault_addr: str = None,
-    vault_token: str = None,
-    server_host: str = None,
-    server_user: str = None,
+    vault_addr: str | None = None,
+    vault_token: str | None = None,
+    server_host: str | None = None,
+    server_user: str | None = None,
     server_port: int = 22,
-    ssh_key_path: str = None,
+    ssh_key_path: str | None = None,
     vault_hostname: str = "chubcity-master.chub-city.ts.net",
 ) -> bool:
     """
@@ -52,7 +51,7 @@ def check_tailscale_key(
     # Get vault_addr from environment, argument, or auto-detect
     if not vault_addr:
         vault_addr = os.getenv("VAULT_ADDR")
-    
+
     # If still no vault_addr and server info provided, try auto-detection
     if not vault_addr and server_host and server_user:
         logger.info("Auto-detecting Vault address via Tailscale...")
@@ -63,7 +62,7 @@ def check_tailscale_key(
             ssh_key_path=ssh_key_path,
             vault_hostname=vault_hostname,
         )
-    
+
     if not vault_addr:
         logger.error("Vault address not found. Set VAULT_ADDR or provide server info.")
         return False
@@ -71,7 +70,7 @@ def check_tailscale_key(
     # Get vault_token from environment, argument, or retrieve from server
     if not vault_token:
         vault_token = os.getenv("VAULT_TOKEN")
-    
+
     # If still no token and server info provided, try retrieving from server
     if not vault_token and server_host and server_user:
         logger.info("Retrieving Vault token from server...")
@@ -81,7 +80,7 @@ def check_tailscale_key(
             port=server_port,
             ssh_key_path=ssh_key_path,
         )
-    
+
     if not vault_token:
         logger.error("Vault token not found. Set VAULT_TOKEN or provide server info.")
         return False
@@ -105,35 +104,30 @@ def check_tailscale_key(
     # Check for Tailscale secret
     logger.info("Checking for Tailscale auth key at infra/tailscale...")
     secret = handler.get_secret("tailscale")
-    
+
     if secret:
         logger.info("✓ Tailscale secret found!")
         if "auth_key" in secret:
             auth_key = secret["auth_key"]
             # Show first and last few characters for security
-            if len(auth_key) > 20:
-                masked_key = f"{auth_key[:10]}...{auth_key[-10:]}"
-            else:
-                masked_key = "***"
+            masked_key = f"{auth_key[:10]}...{auth_key[-10:]}" if len(auth_key) > 20 else "***"
             logger.info(f"  auth_key: {masked_key} (length: {len(auth_key)})")
             logger.info(f"  Full key starts with: {auth_key[:15]}")
             return True
-        else:
-            logger.warning("  Secret found but 'auth_key' key not present")
-            logger.info(f"  Keys in secret: {list(secret.keys())}")
-            return False
-    else:
-        logger.warning("✗ Tailscale secret not found at infra/tailscale")
+        logger.warning("  Secret found but 'auth_key' key not present")
+        logger.info(f"  Keys in secret: {list(secret.keys())}")
         return False
+    logger.warning("✗ Tailscale secret not found at infra/tailscale")
+    return False
 
 
 def list_infra_secrets(
-    vault_addr: str = None,
-    vault_token: str = None,
-    server_host: str = None,
-    server_user: str = None,
+    vault_addr: str | None = None,
+    vault_token: str | None = None,
+    server_host: str | None = None,
+    server_user: str | None = None,
     server_port: int = 22,
-    ssh_key_path: str = None,
+    ssh_key_path: str | None = None,
     vault_hostname: str = "chubcity-master.chub-city.ts.net",
 ):
     """
@@ -150,7 +144,7 @@ def list_infra_secrets(
     # Get vault_addr from environment, argument, or auto-detect
     if not vault_addr:
         vault_addr = os.getenv("VAULT_ADDR")
-    
+
     if not vault_addr and server_host and server_user:
         logger.info("Auto-detecting Vault address via Tailscale...")
         vault_addr = detect_vault_addr_via_tailscale(
@@ -160,7 +154,7 @@ def list_infra_secrets(
             ssh_key_path=ssh_key_path,
             vault_hostname=vault_hostname,
         )
-    
+
     if not vault_addr:
         logger.error("Vault address not found. Set VAULT_ADDR or provide server info.")
         return
@@ -168,7 +162,7 @@ def list_infra_secrets(
     # Get vault_token
     if not vault_token:
         vault_token = os.getenv("VAULT_TOKEN")
-    
+
     if not vault_token and server_host and server_user:
         logger.info("Retrieving Vault token from server...")
         vault_token = retrieve_vault_token_from_server(
@@ -177,7 +171,7 @@ def list_infra_secrets(
             port=server_port,
             ssh_key_path=ssh_key_path,
         )
-    
+
     if not vault_token:
         logger.error("Vault token not found. Set VAULT_TOKEN or provide server info.")
         return
@@ -198,7 +192,7 @@ def list_infra_secrets(
 
     logger.info(f"✓ Connected to Vault at {vault_addr}")
     logger.info("Listing secrets under infra/...")
-    
+
     secrets = handler.list_secrets()
     if secrets:
         logger.info(f"Found {len(secrets)} secret(s):")
@@ -293,7 +287,7 @@ Examples:
                 vault_hostname=args.vault_hostname,
             )
             return 0 if exists else 1
-        elif args.list_infra:
+        if args.list_infra:
             list_infra_secrets(
                 vault_addr=args.vault_addr,
                 vault_token=args.vault_token,
@@ -312,4 +306,3 @@ Examples:
 
 if __name__ == "__main__":
     sys.exit(main())
-
