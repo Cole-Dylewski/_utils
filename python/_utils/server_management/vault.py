@@ -51,6 +51,24 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+def _mask_sensitive_value(value: str | Any) -> str:
+    """
+    Mask sensitive values for logging/display purposes.
+
+    :param value: The value to mask
+    :return: Masked value string
+    """
+    if value is None:
+        return "*** (masked)"
+
+    value_str = str(value)
+    if len(value_str) <= 8:
+        return "*** (masked)"
+
+    # Show first 4 and last 4 characters
+    return f"{value_str[:4]}...{value_str[-4:]} (masked)"
+
+
 class VaultHandler:
     """
     Handles HashiCorp Vault operations including authentication, secret management,
@@ -296,20 +314,18 @@ class VaultHandler:
             response = client.secrets.kv.v2.read_secret_version(path=secret_path)
             if response and "data" in response and "data" in response["data"]:
                 data = response["data"]["data"]
+                # Log keys only, never log values
                 logger.debug(
                     f"[VAULT] Successfully read secret from {full_path}, keys: {list(data.keys())}"
                 )
                 return data
             logger.debug(f"[VAULT] Secret not found or empty at {full_path}")
             return None
-        except Exception as e:
-            logger.debug(f"[VAULT] Error reading secret from {full_path}: {e}")
-            logger.debug(f"[VAULT] Exception type: {type(e).__name__}")
-            return None
         except InvalidPath:
             return None
         except Exception as e:
-            logger.warning(f"Could not read secret at {secret_path}: {e}")
+            logger.debug(f"[VAULT] Error reading secret from {full_path}: {e}")
+            logger.debug(f"[VAULT] Exception type: {type(e).__name__}")
             return None
 
     def create_or_update_secret(
@@ -562,7 +578,14 @@ def _cmd_list_all(args, parser):
         print("No secrets found.")
         return
 
-    print(f"Found {len(secrets)} secret(s):\n")
+    print("WARNING: This command will display sensitive information in plain text!")
+    print("=" * 80)
+    response = input("Do you want to continue? [y/N]: ")
+    if response.lower() != "y":
+        print("Cancelled.")
+        return
+
+    print(f"\nFound {len(secrets)} secret(s):\n")
     print("=" * 80)
 
     for secret_name in secrets:
@@ -573,7 +596,9 @@ def _cmd_list_all(args, parser):
             print(f"\nSecret: secret/{handler.base_path}/{secret_name}")
             print("-" * 80)
             for key, value in secret_data.items():
-                print(f"  {key}: {value}")
+                # Mask sensitive values
+                masked_value = _mask_sensitive_value(value)
+                print(f"  {key}: {masked_value}")
             print()
 
     print("=" * 80)
@@ -594,12 +619,24 @@ def _cmd_get(args, parser):
         sys.exit(1)
 
     if args.json:
-        print(json.dumps(secret_data, indent=2))
+        # For JSON output, mask sensitive values
+        masked_data = {key: _mask_sensitive_value(value) for key, value in secret_data.items()}
+        print(json.dumps(masked_data, indent=2))
+        print("\nWARNING: Values are masked for security.", file=sys.stderr)
     else:
-        print(f"Secret: secret/{handler.base_path}/{args.secret_name}")
+        print("WARNING: This command will display sensitive information in plain text!")
+        print("=" * 60)
+        response = input("Do you want to continue? [y/N]: ")
+        if response.lower() != "y":
+            print("Cancelled.")
+            return
+
+        print(f"\nSecret: secret/{handler.base_path}/{args.secret_name}")
         print("=" * 60)
         for key, value in secret_data.items():
-            print(f"{key}: {value}")
+            # Mask sensitive values
+            masked_value = _mask_sensitive_value(value)
+            print(f"{key}: {masked_value}")
         print("=" * 60)
 
 
