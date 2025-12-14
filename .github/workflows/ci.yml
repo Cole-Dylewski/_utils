@@ -146,7 +146,7 @@ jobs:
   build:
     name: Build package
     runs-on: ubuntu-latest
-    needs: [test, lint, type-check]
+    needs: [test, lint]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
