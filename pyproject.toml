@@ -148,7 +148,7 @@ unfixable = []
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
-"tests/**/*.py" = ["ARG", "S101"]
+"python/tests/**/*.py" = ["ARG", "S101"]
 
 [tool.ruff.isort]
 known-first-party = ["_utils"]

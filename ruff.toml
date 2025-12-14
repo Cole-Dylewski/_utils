@@ -75,7 +75,7 @@ unfixable = []
 # Per-file ignores
 [per-file-ignores]
 "__init__.py" = ["F401"]  # Allow unused imports in __init__.py
-"tests/**/*.py" = ["ARG", "S101"]  # Allow unused arguments and assert in tests
+"python/tests/**/*.py" = ["ARG", "S101"]  # Allow unused arguments and assert in tests
 
 # isort configuration
 [isort]
