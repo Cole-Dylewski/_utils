@@ -36,25 +36,30 @@ repos:
   #       files: ^python/
   #       exclude: ^python/tests/
 
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.6
-    hooks:
-      - id: bandit
-        args: [-r, python, -f, json, -o, bandit-report.json]
-        exclude: ^python/tests/
+  # Bandit is disabled in pre-commit (CI runs it with continue-on-error: true)
+  # Run manually with: bandit -r python
+  # - repo: https://github.com/PyCQA/bandit
+  #   rev: 1.7.6
+  #   hooks:
+  #     - id: bandit
+  #       args: [-r, python, -f, json, -o, bandit-report.json]
+  #       exclude: ^python/tests/
 
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        args: [--profile, black, --check-only]
+  # isort is disabled (ruff handles import sorting)
+  # - repo: https://github.com/pycqa/isort
+  #   rev: 5.13.2
+  #   hooks:
+  #     - id: isort
+  #       args: [--profile, black, --check-only]
 
-  - repo: local
-    hooks:
-      - id: pytest-check
-        name: pytest-check
-        entry: pytest
-        language: system
-        pass_filenames: false
-        always_run: true
-        args: ['-v', '--tb=short']
+  # pytest-check is disabled in pre-commit (CI runs it separately)
+  # Run manually with: pytest
+  # - repo: local
+  #   hooks:
+  #     - id: pytest-check
+  #       name: pytest-check
+  #       entry: pytest
+  #       language: system
+  #       pass_filenames: false
+  #       always_run: true
+  #       args: ['-v', '--tb=short']
