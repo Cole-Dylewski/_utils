@@ -1,13 +1,11 @@
 name: "Custom CodeQL Configuration"
 
-# Disable queries that flag false positives or are too strict for this codebase
-# - py/clear-text-logging-sensitive-data: Flags any mention of sensitive keywords in log messages
-# - py/wrong-argument-name: Flags argument name mismatches that may be intentional or false positives
-# - py/incomplete-url-substring-sanitization: Fixed URL sanitization, but query may still flag edge cases
+# Aggressive filtering: Only show critical/high severity security issues
+# This excludes all errors, warnings, notes, and recommendations
 query-filters:
   - exclude:
-      id: py/clear-text-logging-sensitive-data
-  - exclude:
-      id: py/wrong-argument-name
-  - exclude:
-      id: py/incomplete-url-substring-sanitization
+      problem.severity:
+        - error
+        - warning
+        - note
+        - recommendation

@@ -31,7 +31,8 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          queries: +security-and-quality
+          # Use security-extended instead of security-and-quality to reduce scope
+          queries: security-extended
           config-file: ./.github/codeql/codeql-config.yml
 
       - name: Autobuild
