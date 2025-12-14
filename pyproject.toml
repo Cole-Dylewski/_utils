@@ -65,6 +65,7 @@ dev = [
 Homepage = "https://github.com/Cole-Dylewski/_utils"
 
 [tool.setuptools.packages.find]
+where = ["python"]
 include = ["_utils*"]
 namespaces = false
 
