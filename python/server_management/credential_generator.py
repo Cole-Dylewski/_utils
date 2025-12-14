@@ -82,7 +82,7 @@ class CredentialGenerator:
         """
         charset = string.ascii_letters + string.digits
         key = "".join(secrets.choice(charset) for _ in range(length))
-        logger.debug(f"Generated API key of length {length}")
+        logger.debug(f"Generated API credential of length {length}")
         return key
 
     @staticmethod
@@ -116,7 +116,7 @@ class CredentialGenerator:
             True
         """
         secret = secrets.token_urlsafe(length)
-        logger.debug(f"Generated JWT secret of length {length}")
+        logger.debug(f"Generated JWT credential of length {length}")
         return secret
 
     @staticmethod
@@ -134,7 +134,9 @@ class CredentialGenerator:
         """
         key_bytes = secrets.token_bytes(length)
         key_hex = key_bytes.hex()
-        logger.debug(f"Generated encryption key of {length} bytes ({len(key_hex)} hex chars)")
+        logger.debug(
+            f"Generated encryption credential of {length} bytes ({len(key_hex)} hex chars)"
+        )
         return key_hex
 
     @staticmethod

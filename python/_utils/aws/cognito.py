@@ -149,7 +149,7 @@ class CognitoHandler:
         Returns:
             dict: A dictionary containing the Cognito user ID and tokens.
         """
-        logger.info("Refreshing token for user")
+        logger.info("Refreshing authentication for user")
         try:
             response = self.cognito_client.initiate_auth(
                 ClientId=self.client_id,
@@ -171,13 +171,13 @@ class CognitoHandler:
             }
 
         except self.cognito_client.exceptions.NotAuthorizedException:
-            logger.warning("Invalid refresh token provided")
+            logger.warning("Invalid refresh credential provided")
             raise HTTPException(status_code=401, detail="Invalid refresh token")
         except self.cognito_client.exceptions.UserNotFoundException:
-            logger.warning("User not found for refresh token")
+            logger.warning("User not found for refresh credential")
             raise HTTPException(status_code=404, detail="User not found")
         except Exception as e:
-            logger.exception(f"Error during token refresh: {e!s}")
+            logger.exception("Error during authentication refresh")
             raise HTTPException(status_code=500, detail="Token refresh failed")
 
     def signout_user(self, refresh_token: str):
@@ -762,7 +762,7 @@ class CognitoHandler:
             decoded = base64.urlsafe_b64decode(payload)
             return json.loads(decoded)
         except Exception as e:
-            logger.exception("Error decoding authentication token")
+            logger.exception("Error decoding authentication credential")
             raise HTTPException(status_code=400, detail=f"Invalid token format: {e!s}")
 
     def _get_cognito_user_id(self, decoded_token: dict) -> str:

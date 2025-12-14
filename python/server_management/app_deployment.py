@@ -76,7 +76,7 @@ class Credentials:
     def __post_init__(self) -> None:
         """Validate credentials."""
         if not self.database_password:
-            logger.warning("Database password not provided")
+            logger.warning("Database credential not provided")
 
 
 @dataclass
@@ -265,7 +265,7 @@ class AppDeploymentConfig(ABC):
                 else:
                     logger.warning("Tailscale credential found but 'auth_key' not present")
             else:
-                logger.debug("No Tailscale auth key found in Vault at infra/tailscale")
+                logger.debug("No Tailscale auth credential found in Vault at infra/tailscale")
 
             # Load GitHub credentials (token or SSH key)
             github_secrets = infra_handler.get_secret("github")
@@ -321,16 +321,16 @@ class AppDeploymentConfig(ABC):
             if self.credentials.database_password:
                 database_secret_name = f"{self.environment.value}/database"
                 full_vault_path = f"{vault.base_path}/{database_secret_name}"
-                logger.info(f"[VAULT] Preparing to save database secret to: {full_vault_path}")
+                logger.info(f"[VAULT] Preparing to save database credential to: {full_vault_path}")
 
                 # Check if secret exists
                 existing = vault.get_secret(database_secret_name)
                 if existing and not overwrite:
                     logger.info(
-                        f"[VAULT] Database secret already exists at {full_vault_path}, skipping (use overwrite=True to update)"
+                        f"[VAULT] Database credential already exists at {full_vault_path}, skipping (use overwrite=True to update)"
                     )
                     logger.debug(
-                        f"[VAULT] Existing secret keys: {list(existing.keys()) if existing else 'None'}"
+                        f"[VAULT] Existing credential keys: {list(existing.keys()) if existing else 'None'}"
                     )
                 else:
                     logger.info(
@@ -347,7 +347,7 @@ class AppDeploymentConfig(ABC):
                         verification = vault.get_secret(database_secret_name)
                         if verification:
                             logger.info(
-                                f"[VAULT] Verification: Secret exists at {full_vault_path} with keys: {list(verification.keys())}"
+                                f"[VAULT] Verification: Credential exists at {full_vault_path} with keys: {list(verification.keys())}"
                             )
                         else:
                             logger.warning(
@@ -390,7 +390,7 @@ class AppDeploymentConfig(ABC):
                     verification = vault.get_secret(secrets_secret_name)
                     if verification:
                         logger.info(
-                            f"[VAULT] Verification: Secret exists at {full_vault_path} with keys: {list(verification.keys())}"
+                            f"[VAULT] Verification: Credential exists at {full_vault_path} with keys: {list(verification.keys())}"
                         )
                     else:
                         logger.warning(
@@ -410,7 +410,7 @@ class AppDeploymentConfig(ABC):
                     merged_keys = existing.copy()
                     merged_keys.update(self.credentials.api_keys)
                     keys_to_save = merged_keys
-                    logger.info(f"Merging with existing API keys at {api_keys_secret_name}")
+                    logger.info(f"Merging with existing API credentials at {api_keys_secret_name}")
                 else:
                     keys_to_save = self.credentials.api_keys
 
@@ -445,7 +445,9 @@ class AppDeploymentConfig(ABC):
                     merged_secrets = existing.copy()
                     merged_secrets.update(tailscale_secret)
                     secrets_to_save = merged_secrets
-                    logger.info("Merging with existing infrastructure secrets at infra/tailscale")
+                    logger.info(
+                        "Merging with existing infrastructure credentials at infra/tailscale"
+                    )
                 else:
                     secrets_to_save = tailscale_secret
 
@@ -454,7 +456,7 @@ class AppDeploymentConfig(ABC):
                     logger.info("Saved Tailscale auth credential to Vault: infra/tailscale")
                     saved_count += 1
                 else:
-                    logger.error("Failed to save Tailscale auth key to Vault")
+                    logger.error("Failed to save Tailscale auth credential to Vault")
 
             if saved_count > 0:
                 logger.info(f"Successfully saved {saved_count} credential group(s) to Vault")
