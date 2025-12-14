@@ -128,7 +128,7 @@ class CognitoHandler:
             logger.exception(f"Not authorized: {e!s}")
             raise HTTPException(status_code=401, detail="Invalid username or password")
         except self.cognito_client.exceptions.PasswordResetRequiredException as e:
-            logger.exception(f"Password reset required: {e!s}")
+            logger.exception("Password reset required")
             raise HTTPException(status_code=401, detail="Password reset required")
         except self.cognito_client.exceptions.UserNotConfirmedException as e:
             logger.exception(f"User is not confirmed: {e!s}")
@@ -192,7 +192,7 @@ class CognitoHandler:
         try:
             # Revoke the token using Cognito's revoke token API
             self.cognito_client.revoke_token(Token=refresh_token, ClientId=self.client_id)
-            logger.info("Successfully revoked the token.")
+            logger.info("Successfully revoked authentication token")
             return {"detail": "Signout successful. Token revoked."}
 
         except Exception as e:
@@ -314,7 +314,7 @@ class CognitoHandler:
                 detail="Too many attempts. Please wait before making another request.",
             )
         except Exception as e:
-            logger.exception(f"Error confirming password reset: {e!s}")
+            logger.exception("Error confirming password reset")
             raise HTTPException(status_code=500, detail="Failed to confirm password reset")
 
     def change_password(self, access_token: str, old_password: str, new_password: str) -> dict:
@@ -347,7 +347,7 @@ class CognitoHandler:
         except self.cognito_client.exceptions.LimitExceededException:
             raise HTTPException(status_code=429, detail="Too many requests. Please try again later")
         except Exception as e:
-            logger.exception(f"Error changing password: {e!s}")
+            logger.exception("Error changing password")
             raise HTTPException(status_code=500, detail="Failed to change password")
 
     def manage_user(
@@ -469,7 +469,7 @@ class CognitoHandler:
             logger.exception(f"User creation failed - Username already exists: {username}")
             raise HTTPException(status_code=409, detail="Username already exists")
         except self.cognito_client.exceptions.InvalidPasswordException as e:
-            logger.exception(f"User creation failed - Invalid password: {username}, {e!s}")
+            logger.exception(f"User creation failed - Invalid password: {username}")
             raise HTTPException(status_code=400, detail="Invalid password format")
         except Exception as e:
             logger.exception(f"User creation failed for username: {username}, Error: {e!s}")
@@ -762,7 +762,7 @@ class CognitoHandler:
             decoded = base64.urlsafe_b64decode(payload)
             return json.loads(decoded)
         except Exception as e:
-            logger.exception(f"Error decoding token: {e!s}")
+            logger.exception("Error decoding authentication token")
             raise HTTPException(status_code=400, detail=f"Invalid token format: {e!s}")
 
     def _get_cognito_user_id(self, decoded_token: dict) -> str:

@@ -50,13 +50,12 @@ def dict_to_insert_stmt(log_args, schema, table):
     for i, value in enumerate(valuesList):
         if not value.isnumeric():
             valuesList[i] = "'" + value.replace("'", '"') + "'"
-        print(i, columnsList[i], ":", valuesList[i])
+        # NOTE: Removed print statement - values may contain sensitive data
     columns = "(" + ",".join(columnsList) + ")"
     values = "VALUES(" + ",".join(valuesList) + ")"
 
-    insert_stmt = "INSERT INTO {} {} {};".format(f"{schema}.{table}", columns, values)
-    print("LOG INSERT STATEMENT \n", insert_stmt)
-    return insert_stmt
+    # NOTE: Removed print statement - insert_stmt may contain sensitive data
+    return "INSERT INTO {} {} {};".format(f"{schema}.{table}", columns, values)
 
 
 def df_to_insert_stmt(df, tableName, nullify=None, parseDataTypes=True, strip=False):
