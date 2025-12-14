@@ -24,12 +24,6 @@ from _utils.server_management.ipsa import (
     IPSADeploymentManager,
 )
 from _utils.server_management.terraform import TerraformHandler
-from _utils.server_management.vault import VaultHandler
-from _utils.server_management.vault_auto_config import (
-    auto_configure_vault,
-    detect_vault_addr_via_tailscale,
-    retrieve_vault_token_from_server,
-)
 
 __all__ = [
     "AnsibleHandler",
@@ -45,11 +39,7 @@ __all__ = [
     "ServerConfig",
     "TerraformHandler",
     "VaultConfig",
-    "VaultHandler",
     "allocate_gpu_memory",
     "allocate_gpu_memory_for_vllm_instances",
-    "auto_configure_vault",
     "detect_gpu_memory_via_ssh",
-    "detect_vault_addr_via_tailscale",
-    "retrieve_vault_token_from_server",
 ]

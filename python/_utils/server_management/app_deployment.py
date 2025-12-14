@@ -17,7 +17,6 @@ from typing import Any
 from _utils.server_management.ansible import AnsibleHandler
 from _utils.server_management.credential_generator import CredentialGenerator
 from _utils.server_management.terraform import TerraformHandler
-from _utils.server_management.vault import VaultHandler
 
 logger = logging.getLogger(__name__)
 
@@ -155,149 +154,36 @@ class AppDeploymentConfig(ABC):
 
         return generated
 
-    def get_vault_handler(self) -> VaultHandler | None:
+    def get_vault_handler(self) -> None:
         """
         Get Vault handler if configured.
 
-        :return: VaultHandler instance or None
+        :return: None (Vault support removed)
         """
-        if not self.vault_config:
-            return None
-
-        try:
-            return VaultHandler(
-                vault_addr=self.vault_config.vault_addr,
-                base_path=self.vault_config.base_path,
-                vault_token=self.vault_config.vault_token,
-                vault_skip_verify=self.vault_config.vault_skip_verify,
-                vault_host=self.vault_config.vault_host,
-                token_path=self.vault_config.token_path,
-            )
-        except Exception as e:
-            logger.warning(f"Failed to initialize Vault handler: {e}")
-            return None
+        logger.warning("Vault support has been removed")
 
     def load_credentials_from_vault(self) -> bool:
         """
         Load credentials from Vault if configured.
 
-        Vault secret structure expected:
-        - {base_path}/{environment}/database -> contains "password" key
-        - {base_path}/{environment}/secrets -> contains application secrets
-
-        :return: True if credentials loaded successfully
+        :return: False (Vault support removed)
         """
-        if not self.vault_config:
-            return False
-
-        try:
-            vault = self.get_vault_handler()
-            if not vault:
-                logger.warning("Failed to initialize Vault handler")
-                return False
-
-            # Test connection
-            client = vault.connect()
-            if not client:
-                logger.error("Failed to connect to Vault")
-                return False
-
-            # Load database password
-            # Secret path: {base_path}/{environment}/database
-            database_secret_name = f"{self.environment.value}/database"
-            database_secret = vault.get_secret(database_secret_name)
-
-            if database_secret:
-                if "password" in database_secret:
-                    self.credentials.database_password = database_secret["password"]
-                    logger.info("Loaded database password from Vault")
-                else:
-                    logger.warning(
-                        f"Database secret found but 'password' key not present. "
-                        f"Keys: {list(database_secret.keys())}"
-                    )
-            else:
-                logger.warning(
-                    f"Database secret not found at: {vault.base_path}/{database_secret_name}"
-                )
-
-            # Load application secrets
-            # Secret path: {base_path}/{environment}/secrets
-            secrets_secret_name = f"{self.environment.value}/secrets"
-            app_secrets = vault.get_secret(secrets_secret_name)
-
-            if app_secrets:
-                self.credentials.secrets.update(app_secrets)
-                logger.info(f"Loaded {len(app_secrets)} secrets from Vault")
-            else:
-                logger.debug(
-                    f"No application secrets found at: {vault.base_path}/{secrets_secret_name}"
-                )
-
-            # Load API keys if stored separately
-            # Secret path: {base_path}/{environment}/api_keys
-            api_keys_secret_name = f"{self.environment.value}/api_keys"
-            api_keys = vault.get_secret(api_keys_secret_name)
-
-            if api_keys:
-                self.credentials.api_keys.update(api_keys)
-                logger.info(f"Loaded {len(api_keys)} API keys from Vault")
-
-            # Load infrastructure secrets (Tailscale auth key, GitHub tokens, etc.)
-            # Secret path: infra/* (outside base_path)
-            # Create a temporary handler with base_path="infra" to access infra secrets
-            from _utils.server_management.vault import VaultHandler
-
-            infra_handler = VaultHandler(
-                vault_addr=vault.vault_addr,
-                base_path="infra",
-                vault_token=vault._get_vault_token(),  # Get token from existing handler
-                vault_skip_verify=vault.vault_skip_verify,
-            )
-
-            # Load Tailscale auth key
-            infra_secrets = infra_handler.get_secret("tailscale")
-            if infra_secrets:
-                # Store in a way that app configs can access
-                if "auth_key" in infra_secrets:
-                    self.credentials.secrets["tailscale_auth_key"] = infra_secrets["auth_key"]
-                    logger.info("Loaded Tailscale auth key from Vault at infra/tailscale")
-                else:
-                    logger.warning("Tailscale secret found but 'auth_key' key not present")
-            else:
-                logger.debug("No Tailscale auth key found in Vault at infra/tailscale")
-
-            # Load GitHub credentials (token or SSH key)
-            github_secrets = infra_handler.get_secret("github")
-            if github_secrets:
-                if "token" in github_secrets:
-                    self.credentials.secrets["github_token"] = github_secrets["token"]
-                    # Also add to api_keys for compatibility
-                    self.credentials.api_keys["github_token"] = github_secrets["token"]
-                    logger.info("Loaded GitHub token from Vault at infra/github")
-                if "ssh_key" in github_secrets:
-                    self.credentials.secrets["github_ssh_key"] = github_secrets["ssh_key"]
-                    logger.info("Loaded GitHub SSH key from Vault at infra/github")
-            else:
-                logger.debug("No GitHub credentials found in Vault at infra/github")
-
-            return True
-
-        except Exception as e:
-            logger.error(f"Failed to load credentials from Vault: {e}", exc_info=True)
-            return False
+        logger.warning("Vault support has been removed")
+        return False
 
     def save_credentials_to_vault(self, overwrite: bool = True) -> bool:
         """
         Save credentials to Vault if configured.
 
-        Creates or updates secrets in Vault:
-        - {base_path}/{environment}/database -> contains "password" key
-        - {base_path}/{environment}/secrets -> contains application secrets
-        - {base_path}/{environment}/api_keys -> contains API keys
-
         :param overwrite: If True, overwrite existing secrets. If False, skip if exists.
-        :return: True if credentials saved successfully
+        :return: False (Vault support removed)
+        """
+        logger.warning("Vault support has been removed")
+        return False
+
+    def _save_credentials_to_vault_old(self, overwrite: bool = True) -> bool:
+        """
+        OLD METHOD - Vault support removed.
         """
         if not self.vault_config:
             logger.debug("Vault not configured, skipping secret save")
@@ -421,14 +307,9 @@ class AppDeploymentConfig(ABC):
             # Save infrastructure secrets (Tailscale auth key, etc.) if present
             # Check if tailscale_auth_key is in credentials.secrets
             if "tailscale_auth_key" in self.credentials.secrets:
-                # Create a temporary handler with base_path="infra" to access infra secrets
-                from _utils.server_management.vault import VaultHandler
-
-                infra_handler = VaultHandler(
-                    vault_addr=vault.vault_addr,
-                    base_path="infra",
-                    vault_token=vault._get_vault_token(),  # Get token from existing handler
-                    vault_skip_verify=vault.vault_skip_verify,
+                # Vault support removed
+                logger.warning(
+                    "Vault support has been removed - cannot save infrastructure secrets"
                 )
 
                 tailscale_secret = {"auth_key": self.credentials.secrets["tailscale_auth_key"]}
