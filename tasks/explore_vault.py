@@ -99,10 +99,10 @@ def explore_vault(server_host="demobox", server_user="cole"):
                     if key == "auth_key":
                         # Mask the key for security
                         masked = f"{value[:10]}...{value[-10:]}" if len(value) > 20 else "***"
-                        print(f"     {key}: {masked} (length: {len(value)})")
-                        print(f"     Full key starts with: {value[:15]}")
+                        print(f"     {key}: [REDACTED] (length: {len(value)})")
+                        # NOTE: Never print secret values, even partially - CodeQL security requirement
                     else:
-                        print(f"     {key}: {value}")
+                        print(f"     {key}: [REDACTED]")
             else:
                 print("   ✗ Could not retrieve tailscale secret")
         else:

@@ -404,7 +404,7 @@ class CognitoHandler:
                     ForceAliasCreation=False,
                 )
 
-                print(f"User {username} created successfully.")
+                logger.info(f"User {username} created successfully.")
 
             elif action == "RESET":
                 logger.info(f"Resetting password for user: {username}")

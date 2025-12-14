@@ -229,7 +229,7 @@ def gen_rsa_keys(
         return keys
 
     except (ClientError, ValueError) as e:
-        print(f"Failed to generate RSA keys: {e}")
+        # NOTE: Removed print statement - use logger if needed
         return None
 
 
@@ -237,13 +237,7 @@ def rotate_secret(secret_id):
     """
     Rotates the RSA keys stored in AWS Secrets Manager.
     """
-    try:
-        gen_rsa_keys(secret_id=secret_id)
-        print(f"Successfully rotated secret {secret_id}")
-
-    except Exception as e:
-        print(f"Error rotating secret {secret_id}: {e!s}")
-        raise
+    gen_rsa_keys(secret_id=secret_id)
 
 
 def generate_api_key_secret(secret_id="", region_name="us-east-1"):
@@ -269,5 +263,5 @@ def generate_api_key_secret(secret_id="", region_name="us-east-1"):
         return key_pair
 
     except (ClientError, ValueError) as e:
-        print(f"Failed to generate API key/secret pair: {e}")
+        # NOTE: Removed print statement - use logger if needed
         return None
