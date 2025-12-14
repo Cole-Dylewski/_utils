@@ -76,7 +76,7 @@ class Credentials:
     def __post_init__(self) -> None:
         """Validate credentials."""
         if not self.database_password:
-            logger.warning("database_password not provided")
+            logger.warning("Database password not provided")
 
 
 @dataclass
