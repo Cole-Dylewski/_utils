@@ -13,28 +13,25 @@ import pytest
 class TestBrokerClient:
     """Test BrokerClient class."""
 
-    @patch("alpaca.broker_client.BrokerAPI")
-    def test_broker_client_initialization(self, mock_broker_api):
+    def test_broker_client_initialization(self):
         """Test BrokerClient initialization."""
-        mock_api_instance = MagicMock()
-        mock_broker_api.return_value = mock_api_instance
-
         client = BrokerClient(api_key="test-key", api_secret="test-secret")
-        assert client.api is not None
-        mock_broker_api.assert_called_once()
+        assert client.api_key == "test-key"
+        assert client.api_secret == "test-secret"
+        assert client.base_url == "https://broker-api.sandbox.alpaca.markets"
+        assert "Authorization" in client.headers
 
-    @patch("alpaca.broker_client.BrokerAPI")
-    def test_broker_client_with_base_url(self, mock_broker_api):
+    def test_broker_client_with_base_url(self):
         """Test BrokerClient with custom base URL."""
-        mock_api_instance = MagicMock()
-        mock_broker_api.return_value = mock_api_instance
-
         client = BrokerClient(
             api_key="test-key",
             api_secret="test-secret",
             base_url="https://broker-api.sandbox.alpaca.markets",
         )
-        assert client.api is not None
+        assert client.api_key == "test-key"
+        assert client.api_secret == "test-secret"
+        assert client.base_url == "https://broker-api.sandbox.alpaca.markets"
+        assert "Authorization" in client.headers
 
     @patch("alpaca.broker_client.accounts.create_account")
     def test_create_account(self, mock_create):

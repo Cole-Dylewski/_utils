@@ -13,49 +13,41 @@ import pytest
 class TestTraderClient:
     """Test TraderClient class."""
 
-    @patch("alpaca.trading_client.TradeAPI")
-    def test_trader_client_initialization(self, mock_trade_api):
+    def test_trader_client_initialization(self):
         """Test TraderClient initialization."""
-        mock_api_instance = MagicMock()
-        mock_trade_api.return_value = mock_api_instance
-
         client = TraderClient(api_key="test-key", api_secret="test-secret")
-        assert client.api is not None
-        mock_trade_api.assert_called_once()
+        assert client.api_key == "test-key"
+        assert client.api_secret == "test-secret"
+        assert client.base_url == "https://paper-api.alpaca.markets"
+        assert client.api_version == "v2"
 
-    @patch("alpaca.trading_client.TradeAPI")
-    def test_trader_client_with_base_url(self, mock_trade_api):
+    def test_trader_client_with_base_url(self):
         """Test TraderClient with custom base URL."""
-        mock_api_instance = MagicMock()
-        mock_trade_api.return_value = mock_api_instance
-
         client = TraderClient(
             api_key="test-key",
             api_secret="test-secret",
             base_url="https://paper-api.alpaca.markets",
         )
-        assert client.api is not None
+        assert client.api_key == "test-key"
+        assert client.api_secret == "test-secret"
+        assert client.base_url == "https://paper-api.alpaca.markets"
 
-    @patch("alpaca.trading_client.TradeAPI")
-    def test_get_account(self, mock_trade_api):
+    @patch("alpaca.trader_api.accounts.get_account")
+    def test_get_account(self, mock_get_account):
         """Test getting account information."""
-        mock_api_instance = MagicMock()
-        mock_account = MagicMock()
-        mock_api_instance.get_account.return_value = mock_account
-        mock_trade_api.return_value = mock_api_instance
+        mock_get_account.return_value = {"id": "test-account"}
 
         client = TraderClient(api_key="test-key", api_secret="test-secret")
         account = client.get_account()
         assert account is not None
-        mock_api_instance.get_account.assert_called_once()
+        mock_get_account.assert_called_once_with(
+            "test-key", "test-secret", "https://paper-api.alpaca.markets", "v2"
+        )
 
-    @patch("alpaca.trading_client.TradeAPI")
-    def test_submit_order(self, mock_trade_api):
+    @patch("alpaca.trader_api.orders.submit_order")
+    def test_submit_order(self, mock_submit_order):
         """Test submitting an order."""
-        mock_api_instance = MagicMock()
-        mock_order = MagicMock()
-        mock_api_instance.submit_order.return_value = mock_order
-        mock_trade_api.return_value = mock_api_instance
+        mock_submit_order.return_value = {"id": "test-order-id"}
 
         client = TraderClient(api_key="test-key", api_secret="test-secret")
         order = client.submit_order(
@@ -66,7 +58,17 @@ class TestTraderClient:
             time_in_force="gtc",
         )
         assert order is not None
-        mock_api_instance.submit_order.assert_called_once()
+        mock_submit_order.assert_called_once_with(
+            "test-key",
+            "test-secret",
+            "https://paper-api.alpaca.markets",
+            "v2",
+            "AAPL",
+            10,
+            "buy",
+            "market",
+            "gtc",
+        )
 
     @patch("alpaca.trading_client.portfolio.get_positions")
     def test_get_positions(self, mock_get_positions):

@@ -151,9 +151,12 @@ class CodebuildHandler:
                 "buildBatchConfig": project.get("buildBatchConfig", {}),
             }
 
+        except ValueError:
+            # Re-raise ValueError (project not found)
+            raise
         except Exception as e:
-            print(f"Error retrieving project: {e}")
-            return None
+            logger.exception(f"Error retrieving project: {e}")
+            raise ValueError(f"Failed to retrieve project {project_name}: {e}") from e
 
     def update_codebuild_project_json(self, project_name, **kwargs):
         """
