@@ -2,6 +2,8 @@
 Comprehensive tests for common basic utilities.
 """
 
+from unittest.mock import MagicMock, patch
+
 from common import basic
 import pytest
 
