@@ -63,7 +63,7 @@ source .venv/bin/activate
 ### 4. Verify Installation
 
 ```bash
-python -c "import _utils; print(_utils.__version__)"
+python -c "from utils import sql; print('Package installed successfully')"
 ```
 
 ## All Dependencies Included

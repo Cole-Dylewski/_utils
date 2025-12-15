@@ -1,14 +1,14 @@
 # AWS Module API Reference
 
-::: _utils.aws.s3
-::: _utils.aws.dynamodb
-::: _utils.aws.ecs
-::: _utils.aws.glue
-::: _utils.aws.cognito
-::: _utils.aws.secrets
-::: _utils.aws.codebuild
-::: _utils.aws.transfer_family
-::: _utils.aws.elasticache
-::: _utils.aws.sns
-::: _utils.aws.aws_lambda
-::: _utils.aws.boto3_session
+::: aws.s3
+::: aws.dynamodb
+::: aws.ecs
+::: aws.glue
+::: aws.cognito
+::: aws.secrets
+::: aws.codebuild
+::: aws.transfer_family
+::: aws.elasticache
+::: aws.sns
+::: aws.aws_lambda
+::: aws.boto3_session

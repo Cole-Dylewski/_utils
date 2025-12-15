@@ -1,5 +1,5 @@
 # Database Module API Reference
 
-::: _utils.sql.io
-::: _utils.snowflake.snowpark
-::: _utils.utils.sql
+::: sql.io
+::: snowflake.snowpark
+::: utils.sql

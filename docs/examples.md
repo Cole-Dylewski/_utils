@@ -3,7 +3,7 @@
 ## AWS S3 Operations
 
 ```python
-from _utils.aws import s3
+from aws import s3
 
 # Initialize S3 handler
 handler = s3.S3Handler()
@@ -25,7 +25,7 @@ df = handler.s3_to_df(
 ## Alpaca Trading
 
 ```python
-from _utils.alpaca import TraderClient
+from alpaca import TraderClient
 
 # Initialize client
 client = TraderClient(
@@ -52,7 +52,7 @@ positions = client.get_positions()
 ## Database Operations
 
 ```python
-from _utils.utils import sql
+from utils import sql
 
 # Execute SQL query
 result = sql.run_sql(
@@ -69,7 +69,7 @@ insert_stmt = sql.df_to_insert_stmt(df, 'schema.table')
 ## Tableau Integration
 
 ```python
-from _utils.utils import tableau
+from utils import tableau
 
 # Create Tableau client
 client = tableau.tableau_client(
@@ -91,7 +91,7 @@ with client:
 ## Infrastructure Automation
 
 ```python
-from _utils.server_management import TerraformHandler, AnsibleHandler
+from server_management import TerraformHandler, AnsibleHandler
 
 # Terraform operations
 tf = TerraformHandler(project_dir="./terraform")

@@ -21,9 +21,9 @@ pip install -e .
 ### Basic Usage
 
 ```python
-from _utils.aws import s3
-from _utils.alpaca import TraderClient
-from _utils.utils import sql
+from aws import s3
+from alpaca import TraderClient
+from utils import sql
 
 # AWS S3 operations
 s3_handler = s3.S3Handler()
@@ -72,7 +72,7 @@ General-purpose utilities for common development tasks.
 
 - **GitHub**: [https://github.com/Cole-Dylewski/_utils](https://github.com/Cole-Dylewski/_utils)
 - **Issues**: [GitHub Issues](https://github.com/Cole-Dylewski/_utils/issues)
-- **Security**: See [SECURITY.md](../SECURITY.md) for security concerns
+- **Security**: See [SECURITY.md](https://github.com/Cole-Dylewski/_utils/blob/main/SECURITY.md) for security concerns
 
 ## License
 

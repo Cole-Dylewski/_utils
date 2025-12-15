@@ -56,8 +56,6 @@ nav:
     - Server Management: api/server_management.md
   - Examples: examples.md
   - Contributing: contributing.md
-  - Changelog: ../CHANGELOG.md
-  - Security: ../SECURITY.md
 
 markdown_extensions:
   - pymdownx.highlight:
