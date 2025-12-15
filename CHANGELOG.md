@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Master `requirements.txt` consolidating all dependencies
 - Production readiness plan and roadmap
 - Security policy documentation
+- Custom exception hierarchy (`_utils.exceptions`) with domain-specific exceptions
+- Structured logging utilities (`_utils.utils.logger`) with JSON support
+- CLI tool (`utils` command) for development and testing operations
+- Resilience patterns (`_utils.utils.resilience`): retry, circuit breaker, rate limiting, timeout
+- API documentation setup with MkDocs and auto-generation from docstrings
+- GitHub Actions workflow for documentation deployment
 
 ### Changed
 - Consolidated all requirements files into single `requirements.txt`

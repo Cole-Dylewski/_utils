@@ -59,10 +59,15 @@ dev = [
   "build>=1.0.0",
   "twine>=4.0.0",
   "hvac>=1.0.0",
+  "click>=8.1.0",
+  "structlog>=23.0.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/Cole-Dylewski/_utils"
+
+[project.scripts]
+utils = "_utils.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["python"]

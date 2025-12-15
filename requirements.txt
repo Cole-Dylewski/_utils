@@ -65,3 +65,7 @@ mkdocstrings[python]>=0.23.0
 
 # Vault Integration (for testing)
 hvac>=1.0.0
+
+# CLI and Logging
+click>=8.1.0
+structlog>=23.0.0

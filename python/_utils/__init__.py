@@ -4,6 +4,48 @@ _utils package - Shared utilities for Django, FastAPI, Alpaca, AWS, data, and ML
 
 __version__ = "0.1.0"
 
+# Export logger utilities
+from _utils.utils.logger import StructuredLogger, configure_logging, get_logger
+
+__all__ = [
+    "APIAuthenticationError",
+    "APIConnectionError",
+    "APIError",
+    "APIRateLimitError",
+    "APIResponseError",
+    "AWSConfigurationError",
+    "AWSConnectionError",
+    "AWSOperationError",
+    "AlpacaAPIError",
+    "AlpacaAuthenticationError",
+    "AnsibleError",
+    "ConfigurationError",
+    "CryptographyError",
+    "DataFrameError",
+    "DataProcessingError",
+    "DatabaseConfigurationError",
+    "DatabaseConnectionError",
+    "DatabaseError",
+    "DatabaseQueryError",
+    "DecryptionError",
+    "EncryptionError",
+    "EnvironmentVariableError",
+    "FileNotFoundError",
+    "FileOperationError",
+    "FilePermissionError",
+    "SQLGenerationError",
+    "TableauAPIError",
+    "TableauAuthenticationError",
+    "TerraformError",
+    "TypeValidationError",
+    "UtilsError",
+    "ValidationError",
+    "VaultError",
+    "__version__",
+    "configure_logging",
+    "get_logger",
+]
+
 # Export custom exceptions for easy access
 from _utils.exceptions import (
     AlpacaAPIError,
