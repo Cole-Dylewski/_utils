@@ -30,7 +30,7 @@ class TestCognitoHandler:
         assert handler.client_id == "test-client-id"
         assert handler.user_pool_id == "test-pool-id"
 
-    @patch("aws.cognito.secrets.SecretHandler")
+    @patch("aws.secrets.SecretHandler")
     @patch("aws.boto3_session.Session")
     def test_cognito_handler_initialization_with_secret(self, mock_session, mock_secrets):
         """Test CognitoHandler initialization with Secrets Manager."""
@@ -60,13 +60,23 @@ class TestCognitoHandler:
     @patch("aws.boto3_session.Session")
     def test_authenticate_user(self, mock_session):
         """Test user authentication."""
+        from botocore.exceptions import ClientError
+
         mock_session_instance = MagicMock()
         mock_cognito_client = MagicMock()
+        # Create proper exception classes for boto3
+        mock_exceptions = MagicMock()
+        mock_exceptions.NotAuthorizedException = ClientError(
+            {"Error": {"Code": "NotAuthorizedException", "Message": "Not authorized"}},
+            "initiate_auth",
+        )
+        mock_cognito_client.exceptions = mock_exceptions
         mock_cognito_client.initiate_auth.return_value = {
             "AuthenticationResult": {
                 "AccessToken": "test-access-token",
                 "IdToken": "test-id-token",
                 "RefreshToken": "test-refresh-token",
+                "ExpiresIn": 3600,
             }
         }
         mock_session_instance.client.return_value = mock_cognito_client
@@ -79,18 +89,28 @@ class TestCognitoHandler:
             session=mock_session_instance,
         )
         result = handler.authenticate_user("testuser", "testpass")
-        assert "AccessToken" in result or "challenge_name" in result
+        assert "access_token" in result or "challenge_name" in result
         mock_cognito_client.initiate_auth.assert_called_once()
 
     @patch("aws.boto3_session.Session")
     def test_refresh_user_token(self, mock_session):
         """Test token refresh."""
+        from botocore.exceptions import ClientError
+
         mock_session_instance = MagicMock()
         mock_cognito_client = MagicMock()
+        # Create proper exception classes for boto3
+        mock_exceptions = MagicMock()
+        mock_exceptions.NotAuthorizedException = ClientError(
+            {"Error": {"Code": "NotAuthorizedException", "Message": "Not authorized"}},
+            "initiate_auth",
+        )
+        mock_cognito_client.exceptions = mock_exceptions
         mock_cognito_client.initiate_auth.return_value = {
             "AuthenticationResult": {
                 "AccessToken": "new-access-token",
                 "IdToken": "new-id-token",
+                "ExpiresIn": 3600,
             }
         }
         mock_session_instance.client.return_value = mock_cognito_client
@@ -103,5 +123,5 @@ class TestCognitoHandler:
             session=mock_session_instance,
         )
         result = handler.refresh_user_token("refresh-token")
-        assert "AccessToken" in result
+        assert "access_token" in result
         mock_cognito_client.initiate_auth.assert_called_once()

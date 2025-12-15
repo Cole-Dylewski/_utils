@@ -64,6 +64,7 @@ class TestLambdaHandler:
             memory_limit_in_mb = 128
             aws_request_id = "test-request-id"
             log_stream_name = "test-log-stream"
+            log_group_name = "/aws/lambda/test-function"
 
         context = MockContext()
         result = context_to_json(context)

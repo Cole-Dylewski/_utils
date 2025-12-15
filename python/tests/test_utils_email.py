@@ -20,8 +20,8 @@ class TestEmailUtils:
     def test_send_email_with_secret(self, mock_secrets_handler):
         """Test sending email with Secrets Manager."""
         mock_secrets_handler.get_secret.return_value = {
-            "username": "test@example.com",
-            "password": "test-pass",
+            "emailUsername": "test@example.com",
+            "emailPassword": "test-pass",
         }
 
         with patch("smtplib.SMTP") as mock_smtp:

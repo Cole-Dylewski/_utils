@@ -20,13 +20,10 @@ class TestTransferFamilyHandler:
         mock_session.return_value = mock_session_instance
         mock_session_instance.client.return_value = MagicMock()
 
-        handler = TransferFamilyHandler(
-            server_id="test-server",
-            region_name="us-east-1",
-        )
+        handler = TransferFamilyHandler(region_name="us-east-1")
         assert handler.session is not None
         assert handler.transfer_client is not None
-        assert handler.server_id == "test-server"
+        assert handler.region == "us-east-1"
 
     @patch("aws.boto3_session.Session")
     def test_transfer_family_handler_with_session(self, mock_session):

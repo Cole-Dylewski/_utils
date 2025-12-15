@@ -45,8 +45,8 @@ class TestAPIUtils:
         assert response.status_code == 200
 
     @patch("aws.secrets.SecretHandler")
-    @patch("requests.post")
-    def test_aws_api_request_with_secret(self, mock_post, mock_secrets):
+    @patch("utils.api.requests.request")
+    def test_aws_api_request_with_secret(self, mock_request, mock_secrets):
         """Test AWS API request with Secrets Manager."""
         from utils.api import aws_api_request
 
@@ -59,7 +59,7 @@ class TestAPIUtils:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"result": "success"}
-        mock_post.return_value = mock_response
+        mock_request.return_value = mock_response
 
         result = aws_api_request(
             functionName="test-function",
@@ -67,17 +67,18 @@ class TestAPIUtils:
             api_creds_secret_name="api-secret",
         )
         assert result is not None
-        mock_post.assert_called_once()
+        assert result.status_code == 200
+        mock_request.assert_called_once()
 
-    @patch("requests.post")
-    def test_aws_api_request_with_credentials(self, mock_post):
+    @patch("utils.api.requests.request")
+    def test_aws_api_request_with_credentials(self, mock_request):
         """Test AWS API request with provided credentials."""
         from utils.api import aws_api_request
 
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"result": "success"}
-        mock_post.return_value = mock_response
+        mock_request.return_value = mock_response
 
         result = aws_api_request(
             functionName="test-function",
@@ -87,7 +88,8 @@ class TestAPIUtils:
             body={"key": "value"},
         )
         assert result is not None
-        mock_post.assert_called_once()
+        assert result.status_code == 200
+        mock_request.assert_called_once()
 
     def test_aws_api_request_missing_credentials(self):
         """Test AWS API request raises error when credentials are missing."""
