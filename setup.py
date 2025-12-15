@@ -312,8 +312,52 @@ def setup_venv() -> int:
     return 0
 
 
+def setup():
+    """
+    Minimal setup function for setuptools compatibility.
+
+    This is called by setuptools during package build/install.
+    The actual package configuration is in pyproject.toml via setuptools.build_meta.
+    This function exists only to satisfy setuptools' expectation of a setup() function.
+    """
+    # The actual setup is handled by pyproject.toml
+    # This is just a placeholder to prevent setuptools errors
+
+
 def main() -> int:
     """Main function."""
+    # Check if we're being called by setuptools during build
+    # setuptools calls setup.py with specific commands like 'egg_info', 'build', etc.
+    if len(sys.argv) > 1:
+        setuptools_commands = {
+            "egg_info",
+            "build",
+            "build_py",
+            "build_ext",
+            "build_clib",
+            "build_scripts",
+            "install",
+            "install_lib",
+            "install_headers",
+            "install_scripts",
+            "install_data",
+            "sdist",
+            "bdist",
+            "bdist_dumb",
+            "bdist_rpm",
+            "bdist_wininst",
+            "bdist_wheel",
+            "check",
+            "register",
+            "upload",
+            "develop",
+        }
+        if sys.argv[1] in setuptools_commands:
+            # We're being called by setuptools, don't run dev setup
+            # The actual setup is handled by pyproject.toml
+            return 0
+
+    # Run custom dev setup logic
     if len(sys.argv) > 1 and sys.argv[1] == "activate":
         return activate_venv()
     return setup_venv()
