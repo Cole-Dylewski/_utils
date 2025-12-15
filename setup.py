@@ -363,8 +363,10 @@ def main() -> int:
             "develop",
         }
         if sys.argv[1] in setuptools_commands:
-            # We're being called by setuptools, don't run dev setup
-            # The actual setup is handled by pyproject.toml
+            # We're being called by setuptools, call setup() function
+            # The actual build uses pyproject.toml via setuptools.build_meta,
+            # but setuptools may still check for setup.py
+            setup()
             return 0
 
     # Run custom dev setup logic
