@@ -13,64 +13,90 @@ authors = [
   { name = "Cole Dylewski" }
 ]
 keywords = ["utilities", "fastapi", "aws", "alpaca", "data", "ml", "snowflake"]
-# keep base install minimal; prefer extras below
-dependencies = []
-
-# opt-in feature groups so you can install only what a given project needs
-[project.optional-dependencies]
-alpaca = [
-  "alpaca-trade-api>=3.1.0",
-  "pandas>=2.0",
-]
-aws = [
+# All dependencies are required - no optional dependencies
+dependencies = [
+  # Alpaca Trading API - NOTE: Using custom REST API implementation, SDK not needed
+  # "alpaca-trade-api>=3.1.0",  # Removed - using REST APIs instead of SDK
+  # AWS Services
   "boto3>=1.28",
-  "botocore>=1.31",
-]
-db = [
+  # Note: botocore is included with boto3, no need to specify separately
+  # Database
   "SQLAlchemy>=2.0",
   "psycopg[binary]>=3.1",
-  "asyncpg"
-]
-fastapi = [
+  "psycopg2-binary>=2.9.0",  # Required for legacy code using psycopg2
+  "asyncpg",
+  # FastAPI
   "fastapi>=0.110",
   "pydantic>=2.0",
   "uvicorn>=0.23",
-]
-ml = [
+  # HTTP Clients
+  "httpx>=0.24.0",
+  "requests>=2.32.0",
+  # urllib3>=2.0 required by tableauserverclient>=0.38
+  "urllib3>=2.0.0,<3.0",
+  # Machine Learning
   "numpy>=1.26",
   "pandas>=2.0",
   "scikit-learn>=1.4",
-]
-tableau = [
-  "tableauserverclient>=0.26"
-]
-dev = [
+  # Tableau
+  # Use version compatible with urllib3>=2.0 (tableauserverclient 0.38+ requires urllib3==2.x)
+  "tableauserverclient>=0.38",
+  # Testing
   "pytest>=7.4.0",
   "pytest-cov>=4.1.0",
   "pytest-asyncio>=0.21.0",
   "pytest-mock>=3.12.0",
   "pytest-timeout>=2.2.0",
+  "pytest-benchmark>=4.0.0",
+  "pytest-xdist>=3.3.0",
+  "moto>=5.0.0",
+  "responses>=0.24.0",
+  "freezegun>=1.2.0",
+  "faker>=20.0.0",
+  # Code Quality
   "ruff>=0.1.0",
   "mypy>=1.7.0",
   "pre-commit>=3.5.0",
+  # Security Scanning
   "safety>=2.3.0",
   "bandit>=1.7.0",
+  # Coverage Reporting
   "coverage>=7.3.0",
+  # Build and Distribution
   "build>=1.0.0",
   "twine>=4.0.0",
+  # Documentation
+  "mkdocs>=1.5.0",
+  "mkdocs-material>=9.0.0",
+  "mkdocstrings[python]>=0.23.0",
+  # Vault Integration
   "hvac>=1.0.0",
+  # CLI and Logging
+  "click>=8.1.0",
+  "structlog>=23.0.0",
+  # Additional Utilities
+  "redis>=4.0.0",  # Redis client for caching and utilities
+  "nest_asyncio>=1.5.0",  # For running async code in sync contexts
 ]
+
+# Optional dependencies kept for backward compatibility but all are now in base dependencies
+[project.optional-dependencies]
 
 [project.urls]
 Homepage = "https://github.com/Cole-Dylewski/_utils"
 
+[project.scripts]
+utils = "cli:main"
+
 [tool.setuptools.packages.find]
 where = ["python"]
-include = ["_utils*"]
+include = ["*"]
+exclude = ["tests*"]
 namespaces = false
 
 [tool.pytest.ini_options]
 testpaths = ["python/tests"]
+pythonpath = ["python"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
@@ -79,12 +105,12 @@ addopts = [
   "--strict-markers",
   "--strict-config",
   "--tb=short",
-  "--cov=python/_utils",
+    "--cov=python",
   "--cov-report=term-missing",
   "--cov-report=html",
   "--cov-report=xml",
   "--cov-branch",
-  "--cov-fail-under=0",
+    "--cov-fail-under=80",
   "--durations=10",
   "-ra",
 ]
@@ -102,7 +128,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["python/_utils"]
+source = ["python"]
 omit = [
     "*/tests/*",
     "*/test_*.py",

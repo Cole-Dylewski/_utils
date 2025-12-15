@@ -1,7 +1,7 @@
 import os
 
-from _utils.aws import s3
-from _utils.utils import sql
+from aws import s3
+from utils import sql
 
 s3_handler = s3.S3Handler()
 

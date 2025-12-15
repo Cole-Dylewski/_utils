@@ -1,7 +1,0 @@
-# Database dependencies
-# Install with: pip install -r requirements-db.txt
-# Or use: pip install -e ".[db]"
-
-SQLAlchemy>=2.0
-psycopg[binary]>=3.1
-asyncpg

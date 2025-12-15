@@ -40,8 +40,8 @@ if env == "local" and not find_utils():
     print("Warning: _utils path not found!")
 # Import _utils
 try:
-    from _utils import lambda_utils
-    from _utils.aws import boto3_session, secrets
+    from aws import aws_lambda as lambda_utils
+    from aws import boto3_session, secrets
 except ImportError as e:
     print(f"Failed to import _utils: {e}")
     sys.exit(1)

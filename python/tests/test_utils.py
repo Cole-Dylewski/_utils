@@ -16,7 +16,7 @@ class TestUtilsModule:
     def test_imports(self):
         """Test that utils modules can be imported."""
         try:
-            from _utils.utils import misc
+            from utils import misc
 
             assert misc is not None
         except ImportError:
@@ -48,8 +48,8 @@ def test_utils_imports():
 
     for module_name in modules_to_test:
         try:
-            module = __import__(f"_utils.utils.{module_name}", fromlist=[module_name])
+            module = __import__(f"utils.{module_name}", fromlist=[module_name])
             assert module is not None
-        except ImportError:
+        except (ImportError, ModuleNotFoundError):
             # Some modules may have optional dependencies
             pass

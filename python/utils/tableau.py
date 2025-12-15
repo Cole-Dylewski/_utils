@@ -15,10 +15,9 @@ import os
 import urllib
 from urllib import parse
 
+from aws import secrets as aws_secrets
 import pandas as pd
 import requests
-
-from _utils.aws import secrets as aws_secrets
 
 
 class tableau_client:

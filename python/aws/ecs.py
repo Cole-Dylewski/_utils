@@ -4,9 +4,8 @@ import logging
 import time
 from typing import Any
 
+from aws import boto3_session, s3, secrets
 from botocore.exceptions import ClientError
-
-from _utils.aws import boto3_session, s3, secrets
 
 # Set up logging
 logger = logging.getLogger(__name__)

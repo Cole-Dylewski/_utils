@@ -24,7 +24,7 @@ class CodebuildHandler:
             if session:
                 self.session = session
             else:
-                from _utils.aws import boto3_session
+                from aws import boto3_session
 
                 self.session = boto3_session.Session(
                     aws_access_key_id=aws_access_key_id,
@@ -151,9 +151,12 @@ class CodebuildHandler:
                 "buildBatchConfig": project.get("buildBatchConfig", {}),
             }
 
+        except ValueError:
+            # Re-raise ValueError (project not found)
+            raise
         except Exception as e:
-            print(f"Error retrieving project: {e}")
-            return None
+            logger.exception(f"Error retrieving project: {e}")
+            raise ValueError(f"Failed to retrieve project {project_name}: {e}") from e
 
     def update_codebuild_project_json(self, project_name, **kwargs):
         """

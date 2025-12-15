@@ -103,8 +103,8 @@ class LambdaHandler:
             print("[INIT] Using provided session object")
             self.session = session
         else:
-            print("[INIT] Importing boto3_session from _utils")
-            from _utils.aws import boto3_session
+            print("[INIT] Importing boto3_session from aws")
+            from aws import boto3_session
 
             self.session = boto3_session.Session(
                 aws_access_key_id=aws_access_key_id,

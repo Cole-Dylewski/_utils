@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 retry_config = Config(retries={"max_attempts": 5, "mode": "standard"})
 
 
-class ElasticacheHandler:
+class ElastiCacheHandler:
     """
     Elasticache with AWS session management, error handling, and logging.
     """
@@ -26,7 +26,7 @@ class ElasticacheHandler:
             if session:
                 self.session = session
             else:
-                from _utils.aws import boto3_session
+                from aws import boto3_session
 
                 self.session = boto3_session.Session(
                     aws_access_key_id=aws_access_key_id,

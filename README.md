@@ -22,25 +22,16 @@ _utils is a modular utility package designed to streamline development across mu
 pip install _utils
 ```
 
-### Optional Dependencies
+### All Dependencies Included
 
-Install only the features you need:
-
-```bash
-# AWS services
-pip install _utils[aws]
-
-# Database operations
-pip install _utils[db]
-
-# Alpaca trading APIs
-pip install _utils[alpaca]
-
-# FastAPI support
-pip install _utils[fastapi]
-
-# Machine learning utilities
-pip install _utils[ml]
+All dependencies are installed by default. The package includes:
+- AWS services (boto3, botocore)
+- Database operations (SQLAlchemy, psycopg, asyncpg)
+- Alpaca trading APIs (alpaca-trade-api)
+- FastAPI support (fastapi, pydantic, uvicorn)
+- Machine learning utilities (numpy, pandas, scikit-learn)
+- Tableau integration (tableauserverclient)
+- Testing and development tools (pytest, ruff, mypy, etc.)
 
 # Tableau integration
 pip install _utils[tableau]
@@ -388,9 +379,25 @@ ansible.run_playbook("setup.yml", extra_vars={"app_version": "1.0.0"})
 ### Core Dependencies
 - Python >=3.10
 
-### Optional Dependencies (by feature group)
+### Installation
 
-**AWS:**
+Install all dependencies from the master requirements file:
+
+```bash
+pip install -r requirements.txt
+```
+
+Or install the package in editable mode:
+
+```bash
+pip install -e .
+```
+
+### Dependency Groups
+
+The `requirements.txt` file includes all dependencies organized by category:
+
+**AWS Services:**
 - boto3 >=1.28
 - botocore >=1.31
 
@@ -399,7 +406,7 @@ ansible.run_playbook("setup.yml", extra_vars={"app_version": "1.0.0"})
 - psycopg[binary] >=3.1
 - asyncpg
 
-**Alpaca:**
+**Alpaca Trading:**
 - alpaca-trade-api >=3.1.0
 - pandas >=2.0
 
@@ -408,7 +415,7 @@ ansible.run_playbook("setup.yml", extra_vars={"app_version": "1.0.0"})
 - pydantic >=2.0
 - uvicorn >=0.23
 
-**ML:**
+**Machine Learning:**
 - numpy >=1.26
 - pandas >=2.0
 - scikit-learn >=1.4
@@ -416,9 +423,12 @@ ansible.run_playbook("setup.yml", extra_vars={"app_version": "1.0.0"})
 **Tableau:**
 - tableauserverclient >=0.26
 
-**Server Management:**
-- hvac (HashiCorp Vault client)
-- pyyaml (for Ansible/YAML operations)
+**Development Tools:**
+- pytest, pytest-cov, pytest-asyncio, pytest-mock, pytest-timeout
+- ruff, mypy, pre-commit
+- safety, bandit
+- coverage, build, twine
+- hvac (for Vault integration)
 
 ## Operational Tasks
 
@@ -441,15 +451,15 @@ The easiest way to set up the development environment:
 
 ```bash
 # Create and configure virtual environment
-python setup-venv.py
+python setup.py
 # or
-python3 setup-venv.py
+python3 setup.py
 ```
 
 This will:
 - Check Python version (requires 3.10+)
 - Create a `.venv` virtual environment
-- Install the package with development dependencies
+- Install all dependencies from `requirements.txt`
 - Install pre-commit hooks
 
 #### Activate Virtual Environment
@@ -459,27 +469,26 @@ After setup, activate the virtual environment:
 **Linux/macOS:**
 ```bash
 source .venv/bin/activate
-# or use the convenience script
-source activate-venv.sh
 ```
 
 **Windows PowerShell:**
-   ```powershell
+```powershell
 .venv\Scripts\Activate.ps1
-# or use the convenience script
-.\activate-venv.ps1
 ```
 
 **Windows Command Prompt:**
 ```cmd
 .venv\Scripts\activate.bat
-# or use the convenience script
-activate-venv.bat
 ```
 
-**Git Bash (Windows):**
+**Fish Shell:**
+```fish
+source .venv/bin/activate.fish
+```
+
+**Get activation instructions:**
 ```bash
-source activate-venv.sh
+python setup.py activate
 ```
 
 #### Manual Setup (Alternative)
@@ -492,14 +501,34 @@ python -m venv .venv
 
 # Activate (see platform-specific commands above)
 
-# Install package with dev dependencies
-pip install -e ".[dev]"
+# Install all dependencies
+pip install -r requirements.txt
+
+# Or install package in editable mode
+pip install -e .
 
 # Install pre-commit hooks
 pre-commit install
 ```
 
-For detailed setup instructions and troubleshooting, see [VENV_SETUP.md](VENV_SETUP.md).
+#### Troubleshooting
+
+**Python Version Issues:**
+- Ensure Python 3.10+ is installed: `python --version`
+- Download from [python.org](https://www.python.org/downloads/)
+
+**Virtual Environment Not Found:**
+- Run `python setup.py` to create the virtual environment
+
+**PowerShell Execution Policy (Windows):**
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+**Permission Errors (Linux/macOS):**
+```bash
+chmod +x setup.py
+```
 
 ### CI/CD Pipeline
 
@@ -545,11 +574,8 @@ Pre-commit hooks include:
 **Quick CI Check:**
 ```bash
 # Run all CI checks locally (tests, lint, type-check, security, build)
-python run_ci.py
-
-# Run specific checks
-python run_ci.py --test --lint
-python run_ci.py --build
+# Note: run_ci.py may need to be recreated if it was removed
+pytest && ruff check . && mypy python
 ```
 
 **Manual Testing:**
@@ -762,11 +788,132 @@ This section tracks planned improvements and new features to enhance the library
 
 ## Contributing
 
-This is a utility library. For contributions:
-1. Follow existing code patterns
-2. Add type hints for new functions
-3. Include docstrings
-4. Update this README for new features
+Thank you for your interest in contributing to _utils! This section provides guidelines and instructions.
+
+### Development Setup
+
+1. **Fork and Clone**
+   ```bash
+   git clone https://github.com/your-username/_utils.git
+   cd _utils
+   ```
+
+2. **Set up Virtual Environment**
+   ```bash
+   python setup.py
+   source .venv/bin/activate  # Linux/macOS
+   # or
+   .venv\Scripts\Activate.ps1  # Windows PowerShell
+   ```
+
+3. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Install Pre-commit Hooks**
+   ```bash
+   pre-commit install
+   ```
+
+### Development Workflow
+
+1. **Create a Branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   # or
+   git checkout -b fix/your-bug-fix
+   ```
+
+2. **Make Changes**
+   - Write code following the project's style guidelines
+   - Add tests for new functionality
+   - Update documentation as needed
+
+3. **Run Tests Locally**
+   ```bash
+   # Run all tests
+   pytest
+
+   # Run with coverage
+   pytest --cov=python/_utils --cov-report=html
+
+   # Run specific test markers
+   pytest -m unit
+   ```
+
+4. **Check Code Quality**
+   ```bash
+   # Lint code
+   ruff check .
+
+   # Format code
+   ruff format .
+
+   # Type check
+   mypy python
+
+   # Security scan
+   bandit -r python
+   safety check
+   ```
+
+5. **Commit Changes**
+   ```bash
+   git add .
+   git commit -m "Description of changes"
+   ```
+
+   Pre-commit hooks will run automatically. If they fail, fix the issues and commit again.
+
+6. **Push and Create Pull Request**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+   Then create a pull request on GitHub.
+
+### Code Style
+
+- Follow PEP 8 style guidelines
+- Use type hints for all function signatures
+- Write docstrings for all public functions and classes
+- Keep line length to 100 characters (enforced by Ruff)
+- Use Ruff for both linting and formatting
+
+### Commit Messages
+
+Write clear, descriptive commit messages using conventional commit prefixes:
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation changes
+- `style:` - Code style changes (formatting)
+- `refactor:` - Code refactoring
+- `test:` - Test additions/changes
+- `chore:` - Maintenance tasks
+
+### Pull Request Process
+
+1. **Update Documentation**
+   - Update README.md if adding new features
+   - Update docstrings for new functions
+   - Add examples if applicable
+
+2. **Ensure Tests Pass**
+   - All tests must pass
+   - Code coverage should not decrease
+   - Minimum 60% coverage required
+
+3. **Check CI Status**
+   - All CI checks must pass
+   - Fix any linting or type checking errors
+   - Address security scan warnings
+
+4. **Create Pull Request**
+   - Use descriptive title
+   - Fill out PR template
+   - Link related issues
+   - Request review from maintainers
 
 ## License
 

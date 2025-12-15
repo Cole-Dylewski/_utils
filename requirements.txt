@@ -1,15 +1,89 @@
-# Base requirements for _utils package
-# This file contains the minimal dependencies required to use the package
-# Base package has no dependencies - all features are optional
+# Master requirements file for _utils package
+# Install all dependencies with: pip install -r requirements.txt
+# Or use: pip install -e "." (all dependencies are now included by default)
 
-# To install with optional dependencies, use:
-# pip install -e ".[alpaca]"     # For Alpaca trading features
-# pip install -e ".[aws]"        # For AWS features
-# pip install -e ".[db]"         # For database features
-# pip install -e ".[fastapi]"   # For FastAPI features
-# pip install -e ".[ml]"        # For machine learning features
-# pip install -e ".[tableau]"   # For Tableau features
-# pip install -e ".[dev]"        # For development dependencies
+# ============================================================================
+# Core Dependencies
+# ============================================================================
 
-# Base dependencies (currently none - package is modular)
-# All dependencies are optional and installed via extras
+# Alpaca Trading API
+# NOTE: Removed - rebuilding module using REST APIs instead of SDK
+# alpaca-trade-api>=3.1.0
+
+# AWS Services
+boto3>=1.28
+# Note: botocore is included with boto3, no need to specify separately
+
+# Database
+SQLAlchemy>=2.0
+psycopg[binary]>=3.1
+psycopg2-binary>=2.9.0  # Required for legacy code using psycopg2
+asyncpg
+
+# FastAPI
+fastapi>=0.110
+pydantic>=2.0
+uvicorn>=0.23
+
+# HTTP Clients
+httpx>=0.24.0
+requests>=2.32.0
+
+# Machine Learning
+numpy>=1.26
+pandas>=2.0
+scikit-learn>=1.4
+
+# Tableau
+# Use version compatible with urllib3>=2.0 (tableauserverclient 0.38+ requires urllib3==2.x)
+tableauserverclient>=0.38
+urllib3>=2.0.0,<3.0
+
+# ============================================================================
+# Development Dependencies
+# ============================================================================
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.12.0
+pytest-timeout>=2.2.0
+pytest-benchmark>=4.0.0
+pytest-xdist>=3.3.0
+moto>=5.0.0
+responses>=0.24.0
+freezegun>=1.2.0
+faker>=20.0.0
+
+# Code Quality
+ruff>=0.1.0
+mypy>=1.7.0
+pre-commit>=3.5.0
+
+# Security Scanning
+safety>=2.3.0
+bandit>=1.7.0
+
+# Coverage Reporting
+coverage>=7.3.0
+
+# Build and Distribution
+build>=1.0.0
+twine>=4.0.0
+
+# Documentation
+mkdocs>=1.5.0
+mkdocs-material>=9.0.0
+mkdocstrings[python]>=0.23.0
+
+# Vault Integration (for testing)
+hvac>=1.0.0
+
+# CLI and Logging
+click>=8.1.0
+structlog>=23.0.0
+
+# Additional Utilities
+redis>=4.0.0  # Redis client for caching and utilities
+nest_asyncio>=1.5.0  # For running async code in sync contexts

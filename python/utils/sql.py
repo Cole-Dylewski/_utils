@@ -20,7 +20,7 @@ elif "AWS_LAMBDA_FUNCTION_VERSION".lower() in env_keys:
 else:
     environment = "local"
 
-from _utils.aws import aws_lambda, s3, secrets
+from aws import aws_lambda, s3, secrets
 
 if environment in ["glue", "lambda"]:
     print(f"Running in {environment}, using default session.")
@@ -29,7 +29,7 @@ if environment in ["glue", "lambda"]:
     session = boto3.Session()
 else:
     print("Running locally, using _utils session.")
-    from _utils.aws import boto3_session
+    from aws import boto3_session
 
     session = boto3_session.Session()
 
@@ -1023,3 +1023,74 @@ def ping_db_server(
     except Exception as e:
         logger.exception(f"Database server connection failed: {e}")
         return False
+
+
+# CLI functionality
+if __name__ == "__main__":
+    import argparse
+    import sys
+
+    parser = argparse.ArgumentParser(description="SQL utility CLI - Run SQL queries and operations")
+    parser.add_argument("query", help="SQL query to execute")
+    parser.add_argument(
+        "--type",
+        "-t",
+        choices=["query", "execute"],
+        default="query",
+        help="Query type: query or execute",
+    )
+    parser.add_argument("--dbname", "-d", required=True, help="Database name")
+    parser.add_argument("--rds", help="RDS type (postgres, redshift)")
+    parser.add_argument("--secret", "-s", help="AWS Secrets Manager secret name")
+    parser.add_argument("--host", default="localhost", help="Database host")
+    parser.add_argument("--port", type=int, default=5432, help="Database port")
+    parser.add_argument("--username", "-u", help="Database username")
+    parser.add_argument("--password", "-p", help="Database password")
+    parser.add_argument(
+        "--return-type",
+        choices=["dataframe", "dict", "list"],
+        default="dataframe",
+        help="Return type",
+    )
+    parser.add_argument("--output", "-o", help="Output file (JSON or CSV)")
+    parser.add_argument("--format", choices=["json", "csv"], default="json", help="Output format")
+
+    args = parser.parse_args()
+
+    try:
+        result = run_sql(
+            query=args.query,
+            queryType=args.type,
+            dbname=args.dbname,
+            secret=args.secret or "",
+            rds=args.rds or "",
+            host=args.host,
+            port=args.port,
+            username=args.username or "postgres",
+            password=args.password or "postgres",
+            returnType=args.return_type,
+        )
+
+        if args.output:
+            if args.format == "json":
+                import json
+
+                if isinstance(result, pd.DataFrame):
+                    result.to_json(args.output, orient="records", indent=2)
+                else:
+                    with open(args.output, "w") as f:
+                        json.dump(result, f, indent=2, default=str)
+            elif isinstance(result, pd.DataFrame):
+                result.to_csv(args.output, index=False)
+            else:
+                print("CSV output only supported for DataFrames", file=sys.stderr)
+                sys.exit(1)
+            print(f"Results written to {args.output}")
+        elif isinstance(result, pd.DataFrame):
+            print(result.to_string())
+        else:
+            print(result)
+
+    except Exception as e:
+        logger.exception(f"SQL operation failed: {e}")
+        sys.exit(1)

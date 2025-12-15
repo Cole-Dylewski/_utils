@@ -42,12 +42,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          python -m pip install --upgrade pip setuptools wheel
+          # Install package in editable mode with optimized resolver
+          # Using --use-pep517 for faster installs
+          pip install --use-pep517 -e . || pip install -e .
 
       - name: Run tests with pytest
         run: |
-          pytest --cov=python/_utils --cov-report=xml --cov-report=html --cov-report=term-missing -v
+          pytest --cov=python --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=30 -v
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -103,8 +105,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          python -m pip install --upgrade pip setuptools wheel
+          # Install package in editable mode with optimized resolver
+          # Using --use-pep517 for faster installs
+          pip install --use-pep517 -e . || pip install -e .
 
       - name: Run mypy
         run: mypy python || true

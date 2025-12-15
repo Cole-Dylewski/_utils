@@ -6,9 +6,17 @@ from dataclasses import dataclass, field
 import os
 from typing import Any, Optional
 
-from snowflake.snowpark import DataFrame, Session
-from snowflake.snowpark import functions as F
-from snowflake.snowpark import types as spt
+try:
+    from snowflake.snowpark import DataFrame, Session
+    from snowflake.snowpark import functions as F
+    from snowflake.snowpark import types as spt
+except ImportError:
+    # snowflake-snowpark-python is an optional dependency
+    # Define minimal stubs for type checking when not installed
+    DataFrame = Any  # type: ignore
+    Session = Any  # type: ignore
+    F = Any  # type: ignore
+    spt = Any  # type: ignore
 
 ConfigDict = dict[str, Any]
 SqlParams = Optional[Sequence[Any] | dict[str, Any]]

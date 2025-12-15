@@ -1,0 +1,71 @@
+site_name: _utils Documentation
+site_description: Comprehensive Python utility library for AWS, Alpaca, databases, and more
+site_author: Cole Dylewski
+site_url: https://cole-dylewski.github.io/_utils
+
+repo_name: Cole-Dylewski/_utils
+repo_url: https://github.com/Cole-Dylewski/_utils
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [python]
+          options:
+            show_source: true
+            show_root_heading: true
+            show_root_toc_entry: true
+            show_object_full_path: true
+            show_category_heading: true
+            show_if_no_docstring: true
+            separate_signature: true
+            docstring_style: google
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - API Reference:
+    - AWS: api/aws.md
+    - Alpaca: api/alpaca.md
+    - Database: api/database.md
+    - Utils: api/utils.md
+    - Server Management: api/server_management.md
+  - Examples: examples.md
+  - Contributing: contributing.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html

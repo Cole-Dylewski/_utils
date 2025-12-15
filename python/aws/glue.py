@@ -5,10 +5,9 @@ import json
 import logging
 from typing import Any
 
+from aws import boto3_session, s3, secrets
 from botocore.exceptions import ClientError
-
-from _utils.aws import boto3_session, s3, secrets
-from _utils.utils import git, misc, sql, teams
+from utils import git, misc, sql, teams
 
 # Set up logging
 logger = logging.getLogger(__name__)

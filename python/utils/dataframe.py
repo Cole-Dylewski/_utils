@@ -18,11 +18,18 @@ def ColNum2ColName(n):
 
 # %%
 def build_rand_df(randRange=100, colNum=10, rowNum=100, columns=None, absNums=True, intOnly=True):
+    # Generate default column names if not provided
     if columns is None:
-        columns = []
-    list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-    # if columns == []: columns = colList[:colNum]
-    columns = [ColNum2ColName(i) for i in range(1, colNum + 1)]
+        columns = [ColNum2ColName(i) for i in range(1, colNum + 1)]
+    # Ensure columns list matches colNum if provided
+    elif len(columns) != colNum:
+        # If provided columns don't match colNum, use provided or extend
+        if len(columns) < colNum:
+            # Extend with generated names
+            columns.extend([ColNum2ColName(i) for i in range(len(columns) + 1, colNum + 1)])
+        else:
+            # Truncate to colNum
+            columns = columns[:colNum]
     # for i in range(1,colNum+1):
     #     print(i, ColNum2ColName(i))
 

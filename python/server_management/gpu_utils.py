@@ -6,6 +6,7 @@ Utilities for detecting GPU information and allocating memory limits.
 
 import logging
 import subprocess
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@
 import base64
 import logging
 
-from _utils.alpaca.broker_api import accounts
+from alpaca.broker_api import accounts
 
 # Configure logging to display information with timestamps and severity level
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

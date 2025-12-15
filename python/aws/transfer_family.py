@@ -2,9 +2,8 @@ import logging
 import time
 from typing import Any
 
+from aws import boto3_session, s3, secrets
 from botocore.exceptions import ClientError
-
-from _utils.aws import boto3_session, s3, secrets
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -221,7 +220,7 @@ class TransferFamilyHandler:
 
         # Step 2: Generate SSH keys if not passed in
         if ssh_key_pair is None:
-            from _utils.utils import cryptography
+            from utils import cryptography
 
             logger.info(f"Generating SSH keypair for client {client_name}")
             ssh_key_pair = cryptography.gen_rsa_keys(

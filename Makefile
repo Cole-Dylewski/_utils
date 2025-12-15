@@ -7,11 +7,11 @@ help: ## Show this help message
 setup: ## Set up development environment (cross-platform)
 	python setup-venv.py
 
-install: ## Install package in development mode
+install: ## Install package in development mode (all dependencies included)
 	pip install -e .
 
-install-dev: ## Install package with development dependencies
-	pip install -e ".[dev]"
+install-dev: ## Install package with all dependencies (same as install, all deps are included)
+	pip install -e .
 	pre-commit install
 
 test: ## Run tests
@@ -67,4 +67,3 @@ check-build: ## Check built package
 	twine check dist/*
 
 all: clean install-dev quality test ## Run all checks (clean, install, quality, test)
-
