@@ -317,60 +317,20 @@ def setup():
     Setup function for setuptools compatibility.
 
     This is called by setuptools during package build/install.
-    Reads configuration from pyproject.toml and calls setuptools.setup().
+    When using setuptools.build_meta, pyproject.toml is the source of truth,
+    but setuptools may still check for setup.py. This provides a minimal
+    setup() that matches the pyproject.toml configuration.
     """
-    # Import setuptools
     from setuptools import find_packages
     from setuptools import setup as _setup
 
-    # Read pyproject.toml for configuration
-    try:
-        import tomllib  # Python 3.11+
-    except ImportError:
-        import tomli as tomllib  # Fallback for Python < 3.11
-
-    pyproject_path = Path(__file__).parent / "pyproject.toml"
-    if not pyproject_path.exists():
-        # Fallback minimal setup
-        _setup(
-            name="utils",
-            version="0.1.0",
-            packages=find_packages(where="python"),
-            package_dir={"": "python"},
-        )
-        return
-
-    with open(pyproject_path, "rb") as f:
-        config = tomllib.load(f)
-
-    project = config.get("project", {})
-    setuptools_config = config.get("tool", {}).get("setuptools", {})
-
-    # Get package configuration
-    packages_config = setuptools_config.get("packages", {})
-    if packages_config.get("find"):
-        find_config = packages_config["find"]
-        packages = find_packages(
-            where=find_config.get("where", ["python"])[0]
-            if isinstance(find_config.get("where"), list)
-            else find_config.get("where", "python"),
-        )
-        package_dir = {
-            "": find_config.get("where", ["python"])[0]
-            if isinstance(find_config.get("where"), list)
-            else find_config.get("where", "python")
-        }
-    else:
-        packages = []
-        package_dir = {}
-
-    # Call setuptools.setup() with configuration
+    # Minimal setup matching pyproject.toml configuration
+    # The actual build uses pyproject.toml via setuptools.build_meta
     _setup(
-        name=project.get("name", "utils"),
-        version=project.get("version", "0.1.0"),
-        description=project.get("description", ""),
-        packages=packages,
-        package_dir=package_dir,
+        name="utils",
+        version="0.1.0",
+        packages=find_packages(where="python"),
+        package_dir={"": "python"},
     )
 
 
