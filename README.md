@@ -132,6 +132,8 @@ secret_handler = secrets.SecretHandler()
 creds = secret_handler.get_secret('my-secret')
 ```
 
+**Note:** The package is installed as `_utils` and modules are accessed via `from _utils.module import ...`
+
 ### Alpaca Module (`alpaca/`)
 
 Trading API clients for both Broker and Trader APIs.
@@ -536,9 +538,10 @@ The project includes a comprehensive CI/CD pipeline using GitHub Actions with th
 
 #### Automated Testing
 - **Multi-version Testing**: Tests run on Python 3.10, 3.11, and 3.12
-- **Multi-platform Testing**: Tests run on Ubuntu, Windows, and macOS
-- **Test Coverage**: Code coverage reporting with minimum 60% threshold
+- **Multi-platform Testing**: Tests run on Ubuntu, Windows, and macOS (Python 3.10 only for Windows/Mac)
+- **Test Coverage**: Code coverage reporting for `python/_utils` package
 - **Coverage Reports**: HTML and XML coverage reports generated and uploaded
+- **Package Structure**: Tests target the `_utils` package located in `python/_utils/`
 
 #### Code Quality
 - **Linting**: Automated linting with Ruff (replaces flake8, isort, and more)
@@ -583,8 +586,8 @@ pytest && ruff check . && mypy python
 # Run all tests
 pytest
 
-# Run with coverage
-pytest --cov=_utils --cov-report=html
+# Run with coverage (coverage targets python/_utils package)
+pytest --cov=python/_utils --cov-report=html
 
 # Run specific test markers
 pytest -m unit
@@ -596,6 +599,9 @@ pytest -v
 
 # Run tests with specific markers
 pytest -m "aws or vault"
+
+# Run tests without coverage
+pytest --no-cov
 ```
 
 #### Test Markers
@@ -674,6 +680,17 @@ The CI pipeline runs automatically on:
 
 All checks must pass before merging pull requests.
 
+#### Recent Testing Updates
+
+The testing infrastructure has been updated with the following changes:
+
+- **Package Structure**: Tests now target the `python/_utils/` package structure
+- **Coverage Configuration**: Coverage reporting focuses on the `_utils` package namespace
+- **Test Discovery**: Tests are located in `python/tests/` and automatically discovered by pytest
+- **CI Workflow**: Uses `pip install -e ".[dev]"` to install package with development dependencies
+- **Multi-Platform**: Python 3.10 tested on Ubuntu, Windows, and macOS; 3.11 and 3.12 tested on Ubuntu only
+- **Coverage Threshold**: Currently no minimum coverage threshold (can be adjusted as test coverage improves)
+
 #### Package Building and Publishing
 
 The CI pipeline automatically builds the package and validates it. To publish to PyPI:
@@ -684,11 +701,12 @@ The CI pipeline automatically builds the package and validates it. To publish to
 
 #### Configuration Files
 
-- `pytest.ini` - Pytest configuration
+- `pytest.ini` - Pytest configuration (coverage targets `python/_utils`, test discovery in `python/tests`)
 - `ruff.toml` - Ruff linting and formatting configuration
 - `mypy.ini` - MyPy type checking configuration
 - `.pre-commit-config.yaml` - Pre-commit hooks configuration
-- `pyproject.toml` - Project metadata and tool configurations
+- `pyproject.toml` - Project metadata, dependencies, and tool configurations
+- `.github/workflows/ci.yml` - GitHub Actions CI workflow configuration
 
 ### Project Status
 
@@ -699,6 +717,9 @@ The CI pipeline automatically builds the package and validates it. To publish to
 - ✅ Tableau integration
 - ✅ Server management and infrastructure automation
 - ✅ General utilities
+- ✅ CI/CD pipeline with multi-platform testing
+- ✅ Package restructured under `python/_utils/` namespace
+- ⚠️ Test coverage is minimal (basic test structure in place)
 
 **Known Limitations:**
 - ⚠️ Some modules may have incomplete type hints
@@ -710,15 +731,18 @@ The CI pipeline automatically builds the package and validates it. To publish to
 This section tracks planned improvements and new features to enhance the library's capabilities and demonstrate advanced software engineering practices.
 
 ### Testing & Quality Assurance
-- [x] **Comprehensive Test Suite**: Add unit tests using pytest for all modules (structure created, tests in progress)
+- [x] **Test Suite Structure**: Basic test structure with pytest for core modules
+- [ ] **Comprehensive Test Coverage**: Expand unit tests for all modules (currently minimal test coverage)
 - [ ] **Integration Tests**: Test AWS service integrations with localstack or moto
-- [x] **Test Coverage**: Code coverage reporting with coverage.py (60% minimum threshold)
+- [x] **Test Coverage Reporting**: Code coverage reporting with coverage.py (currently no minimum threshold)
 - [x] **CI/CD Pipeline**: GitHub Actions workflow for automated testing
   - [x] Run tests on multiple Python versions (3.10, 3.11, 3.12)
+  - [x] Multi-platform testing (Ubuntu, Windows, macOS)
   - [x] Linting with ruff and type checking with mypy
   - [x] Automated dependency vulnerability scanning (Safety, Bandit, CodeQL)
-  - [x] Code coverage reporting and badges
+  - [x] Code coverage reporting and artifact uploads
 - [x] **Pre-commit Hooks**: Automated code quality checks before commits
+- [x] **Package Restructure**: Package organized under `python/_utils/` for proper namespace
 
 ### Documentation & Developer Experience
 - [ ] **API Documentation**: Generate comprehensive API docs with Sphinx or mkdocs
