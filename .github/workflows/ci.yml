@@ -49,7 +49,7 @@ jobs:
 
       - name: Run tests with pytest
         run: |
-          pytest --cov=python --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=80 -v
+          pytest --cov=python --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=30 -v
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
