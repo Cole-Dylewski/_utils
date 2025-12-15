@@ -135,7 +135,7 @@ _utils/                    # Repository root
 │   ├── exceptions.py        # Custom exceptions
 │   └── __init__.py          # Package initialization
 ├── .github/                 # GitHub Actions workflows
-├── docs/                    # Documentation (if applicable)
+├── examples/                # Example usage scripts
 ├── pyproject.toml           # Project configuration
 ├── pytest.ini              # Pytest configuration
 └── README.md                # This file
@@ -787,11 +787,8 @@ This section tracks planned improvements and new features to enhance the library
 - [x] **Package Restructure**: Package organized under `python/_utils/` for proper namespace
 
 ### Documentation & Developer Experience
-- [ ] **API Documentation**: Generate comprehensive API docs with Sphinx or mkdocs
 - [ ] **Code Examples**: Add more real-world usage examples and tutorials
 - [ ] **Type Stubs**: Complete type hints and generate .pyi stub files
-- [ ] **Changelog**: Maintain CHANGELOG.md for version tracking
-- [ ] **Contributing Guide**: Detailed CONTRIBUTING.md with development workflow
 
 ### Code Quality & Standards
 - [ ] **Type Hints**: Complete type annotations across all modules
@@ -848,7 +845,6 @@ This section tracks planned improvements and new features to enhance the library
 ### Community & Open Source
 - [x] **Issue Templates**: GitHub issue and PR templates
 - [ ] **Code of Conduct**: Community guidelines and code of conduct
-- [ ] **Security Policy**: SECURITY.md for responsible disclosure
 - [ ] **Examples Repository**: Separate repository with usage examples
 - [ ] **Blog Posts**: Technical blog posts showcasing features and use cases
 
