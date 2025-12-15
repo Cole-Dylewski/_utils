@@ -22,84 +22,126 @@ _utils is a modular utility package designed to streamline development across mu
 pip install _utils
 ```
 
-### All Dependencies Included
+### Optional Dependencies
 
-All dependencies are installed by default. The package includes:
-- AWS services (boto3, botocore)
-- Database operations (SQLAlchemy, psycopg, asyncpg)
-- Alpaca trading APIs (alpaca-trade-api)
-- FastAPI support (fastapi, pydantic, uvicorn)
-- Machine learning utilities (numpy, pandas, scikit-learn)
-- Tableau integration (tableauserverclient)
-- Testing and development tools (pytest, ruff, mypy, etc.)
+Install only the features you need:
+
+```bash
+# AWS services
+pip install _utils[aws]
+
+# Database operations
+pip install _utils[db]
+
+# Alpaca trading APIs
+pip install _utils[alpaca]
+
+# FastAPI support
+pip install _utils[fastapi]
+
+# Machine learning utilities
+pip install _utils[ml]
 
 # Tableau integration
 pip install _utils[tableau]
+
+# Development dependencies (for contributing)
+pip install _utils[dev]
 ```
 
 ## Project Structure
 
+The package structure is organized under the `python/` directory:
+
 ```
-_utils/
-├── alpaca/              # Alpaca trading API clients
-│   ├── broker_api/      # Broker API operations
-│   └── trader_api/      # Trader API operations
-├── aws/                 # AWS service utilities
-│   ├── aws_lambda.py    # Lambda function utilities
-│   ├── boto3_session.py # AWS session management
-│   ├── cloudwatch.py    # CloudWatch operations
-│   ├── codebuild.py     # CodeBuild project management
-│   ├── cognito.py        # Cognito user management
-│   ├── dynamodb.py      # DynamoDB operations
-│   ├── ecs.py           # ECS service management
-│   ├── elasticache.py   # ElastiCache utilities
-│   ├── glue.py          # AWS Glue job management
-│   ├── s3.py            # S3 file operations
-│   ├── secrets.py       # Secrets Manager operations
-│   ├── sns.py           # SNS notifications
-│   └── transfer_family.py # Transfer Family SFTP management
-├── common/              # Common utilities
-│   ├── basic.py         # Basic helper functions
-│   ├── django_request.py # Django request utilities
-│   ├── models.py        # Common models
-│   └── requests.py      # HTTP request utilities
-├── models/              # Model utilities
-│   ├── django_models.py # Django model helpers
-│   └── sql.py           # SQL model utilities
-├── snowflake/           # Snowflake integration
-│   └── snowpark.py      # Snowpark client wrapper
-├── sql/                 # SQL operations
-│   ├── io.py            # SQL I/O operations
-│   └── models.py        # SQL model definitions
-├── server_management/   # Server management and infrastructure automation
-│   ├── ansible.py       # Ansible playbook execution
-│   ├── app_deployment.py # Application deployment framework
-│   ├── credential_generator.py # Credential generation utilities
-│   ├── gpu_utils.py     # GPU memory management utilities
-│   ├── terraform.py     # Terraform project management
-│   └── vault.py         # HashiCorp Vault integration
-├── tableau/             # Tableau integration
-│   └── tableau_client.py # Tableau Server API client
-├── tests/               # Test utilities
-└── utils/                # General utilities
-    ├── api.py           # API request utilities
-    ├── azure.py         # Azure integration
-    ├── cryptography.py  # Encryption/decryption
-    ├── dataframe.py     # DataFrame operations
-    ├── dict_json.py     # Dictionary/JSON utilities
-    ├── email.py         # Email sending
-    ├── files.py         # File operations
-    ├── formatting_tools.py # Text formatting
-    ├── git.py           # Git operations
-    ├── log_print.py     # Logging utilities
-    ├── misc.py          # Miscellaneous helpers
-    ├── redis.py         # Redis operations
-    ├── requirements.py  # Requirements management
-    ├── sql.py           # SQL utilities
-    ├── sync_async.py    # Async/sync utilities
-    ├── tableau.py       # Tableau utilities
-    └── teams.py         # Microsoft Teams integration
+_utils/                    # Repository root
+├── python/                 # Package source code
+│   ├── alpaca/             # Alpaca trading API clients
+│   │   ├── broker_api/     # Broker API operations
+│   │   │   └── accounts.py
+│   │   ├── trader_api/      # Trader API operations
+│   │   │   ├── accounts.py
+│   │   │   ├── assets.py
+│   │   │   ├── calendar.py
+│   │   │   ├── clock.py
+│   │   │   ├── crypto.py
+│   │   │   ├── data/        # Market data APIs
+│   │   │   ├── history.py
+│   │   │   ├── orders.py
+│   │   │   ├── portfolio.py
+│   │   │   └── watchlists.py
+│   │   ├── broker_client.py
+│   │   └── trading_client.py
+│   ├── aws/                 # AWS service utilities
+│   │   ├── aws_lambda.py    # Lambda function utilities
+│   │   ├── boto3_session.py # AWS session management
+│   │   ├── cloudwatch.py    # CloudWatch operations
+│   │   ├── codebuild.py     # CodeBuild project management
+│   │   ├── cognito.py       # Cognito user management
+│   │   ├── dynamodb.py      # DynamoDB operations
+│   │   ├── ecs.py           # ECS service management
+│   │   ├── elasticache.py   # ElastiCache utilities
+│   │   ├── glue.py          # AWS Glue job management
+│   │   ├── s3.py            # S3 file operations
+│   │   ├── secrets.py       # Secrets Manager operations
+│   │   ├── sns.py           # SNS notifications
+│   │   └── transfer_family.py # Transfer Family SFTP management
+│   ├── common/              # Common utilities
+│   │   ├── basic.py         # Basic helper functions
+│   │   ├── django_request.py # Django request utilities
+│   │   ├── models.py        # Common models
+│   │   └── requests.py      # HTTP request utilities
+│   ├── models/              # Model utilities
+│   │   ├── django_models.py # Django model helpers
+│   │   └── sql.py           # SQL model utilities
+│   ├── snowflake/           # Snowflake integration
+│   │   └── snowpark.py      # Snowpark client wrapper
+│   ├── sql/                 # SQL operations
+│   │   ├── io.py            # SQL I/O operations
+│   │   └── models.py        # SQL model definitions
+│   ├── server_management/   # Server management and infrastructure automation
+│   │   ├── ansible.py       # Ansible playbook execution
+│   │   ├── app_deployment.py # Application deployment framework
+│   │   ├── credential_generator.py # Credential generation utilities
+│   │   ├── gpu_utils.py     # GPU memory management utilities
+│   │   ├── terraform.py     # Terraform project management
+│   │   └── vault.py         # HashiCorp Vault integration
+│   ├── tableau/             # Tableau integration
+│   │   └── tableau_client.py # Tableau Server API client
+│   ├── utils/               # General utilities
+│   │   ├── api.py           # API request utilities
+│   │   ├── azure.py         # Azure integration
+│   │   ├── cache.py         # Caching utilities
+│   │   ├── cryptography.py  # Encryption/decryption
+│   │   ├── dataframe.py     # DataFrame operations
+│   │   ├── dict_json.py     # Dictionary/JSON utilities
+│   │   ├── email.py         # Email sending
+│   │   ├── files.py         # File operations
+│   │   ├── formatting_tools.py # Text formatting
+│   │   ├── git.py           # Git operations
+│   │   ├── log_print.py     # Logging utilities
+│   │   ├── logger.py        # Structured logging
+│   │   ├── misc.py          # Miscellaneous helpers
+│   │   ├── redis.py         # Redis operations
+│   │   ├── requirements.py  # Requirements management
+│   │   ├── resilience.py    # Retry and rate limiting
+│   │   ├── sql.py           # SQL utilities
+│   │   ├── sync_async.py    # Async/sync utilities
+│   │   ├── tableau.py       # Tableau utilities
+│   │   └── teams.py         # Microsoft Teams integration
+│   ├── tests/               # Test suite
+│   │   └── [test files]     # Comprehensive test coverage
+│   ├── cli.py               # Command-line interface
+│   ├── exceptions.py        # Custom exceptions
+│   └── __init__.py          # Package initialization
+├── .github/                 # GitHub Actions workflows
+├── examples/                # Example usage scripts
+├── pyproject.toml           # Project configuration
+├── pytest.ini              # Pytest configuration
+└── README.md                # This file
 ```
+
+**Note:** When installed, modules are imported directly from their top-level names (e.g., `from aws import s3`, `from alpaca import TraderClient`, `from utils import sql`).
 
 ## Module Descriptions
 
@@ -131,6 +173,8 @@ s3_handler.send_to_s3(data=df, bucket='my-bucket', s3_file_name='data.csv')
 secret_handler = secrets.SecretHandler()
 creds = secret_handler.get_secret('my-secret')
 ```
+
+**Note:** The package is installed as `_utils` and modules are accessed via `from _utils.module import ...`
 
 ### Alpaca Module (`alpaca/`)
 
@@ -536,9 +580,10 @@ The project includes a comprehensive CI/CD pipeline using GitHub Actions with th
 
 #### Automated Testing
 - **Multi-version Testing**: Tests run on Python 3.10, 3.11, and 3.12
-- **Multi-platform Testing**: Tests run on Ubuntu, Windows, and macOS
-- **Test Coverage**: Code coverage reporting with minimum 60% threshold
+- **Multi-platform Testing**: Tests run on Ubuntu, Windows, and macOS (Python 3.10 only for Windows/Mac)
+- **Test Coverage**: Code coverage reporting for `python/_utils` package
 - **Coverage Reports**: HTML and XML coverage reports generated and uploaded
+- **Package Structure**: Tests target the `_utils` package located in `python/_utils/`
 
 #### Code Quality
 - **Linting**: Automated linting with Ruff (replaces flake8, isort, and more)
@@ -583,8 +628,8 @@ pytest && ruff check . && mypy python
 # Run all tests
 pytest
 
-# Run with coverage
-pytest --cov=_utils --cov-report=html
+# Run with coverage (coverage targets python/_utils package)
+pytest --cov=python/_utils --cov-report=html
 
 # Run specific test markers
 pytest -m unit
@@ -596,6 +641,9 @@ pytest -v
 
 # Run tests with specific markers
 pytest -m "aws or vault"
+
+# Run tests without coverage
+pytest --no-cov
 ```
 
 #### Test Markers
@@ -674,6 +722,17 @@ The CI pipeline runs automatically on:
 
 All checks must pass before merging pull requests.
 
+#### Recent Testing Updates
+
+The testing infrastructure has been updated with the following changes:
+
+- **Package Structure**: Tests now target the `python/_utils/` package structure
+- **Coverage Configuration**: Coverage reporting focuses on the `_utils` package namespace
+- **Test Discovery**: Tests are located in `python/tests/` and automatically discovered by pytest
+- **CI Workflow**: Uses `pip install -e ".[dev]"` to install package with development dependencies
+- **Multi-Platform**: Python 3.10 tested on Ubuntu, Windows, and macOS; 3.11 and 3.12 tested on Ubuntu only
+- **Coverage Threshold**: Currently no minimum coverage threshold (can be adjusted as test coverage improves)
+
 #### Package Building and Publishing
 
 The CI pipeline automatically builds the package and validates it. To publish to PyPI:
@@ -684,11 +743,12 @@ The CI pipeline automatically builds the package and validates it. To publish to
 
 #### Configuration Files
 
-- `pytest.ini` - Pytest configuration
+- `pytest.ini` - Pytest configuration (coverage targets `python/_utils`, test discovery in `python/tests`)
 - `ruff.toml` - Ruff linting and formatting configuration
 - `mypy.ini` - MyPy type checking configuration
 - `.pre-commit-config.yaml` - Pre-commit hooks configuration
-- `pyproject.toml` - Project metadata and tool configurations
+- `pyproject.toml` - Project metadata, dependencies, and tool configurations
+- `.github/workflows/ci.yml` - GitHub Actions CI workflow configuration
 
 ### Project Status
 
@@ -699,6 +759,9 @@ The CI pipeline automatically builds the package and validates it. To publish to
 - ✅ Tableau integration
 - ✅ Server management and infrastructure automation
 - ✅ General utilities
+- ✅ CI/CD pipeline with multi-platform testing
+- ✅ Package restructured under `python/_utils/` namespace
+- ⚠️ Test coverage is minimal (basic test structure in place)
 
 **Known Limitations:**
 - ⚠️ Some modules may have incomplete type hints
@@ -710,22 +773,22 @@ The CI pipeline automatically builds the package and validates it. To publish to
 This section tracks planned improvements and new features to enhance the library's capabilities and demonstrate advanced software engineering practices.
 
 ### Testing & Quality Assurance
-- [x] **Comprehensive Test Suite**: Add unit tests using pytest for all modules (structure created, tests in progress)
+- [x] **Test Suite Structure**: Basic test structure with pytest for core modules
+- [ ] **Comprehensive Test Coverage**: Expand unit tests for all modules (currently minimal test coverage)
 - [ ] **Integration Tests**: Test AWS service integrations with localstack or moto
-- [x] **Test Coverage**: Code coverage reporting with coverage.py (60% minimum threshold)
+- [x] **Test Coverage Reporting**: Code coverage reporting with coverage.py (currently no minimum threshold)
 - [x] **CI/CD Pipeline**: GitHub Actions workflow for automated testing
   - [x] Run tests on multiple Python versions (3.10, 3.11, 3.12)
+  - [x] Multi-platform testing (Ubuntu, Windows, macOS)
   - [x] Linting with ruff and type checking with mypy
   - [x] Automated dependency vulnerability scanning (Safety, Bandit, CodeQL)
-  - [x] Code coverage reporting and badges
+  - [x] Code coverage reporting and artifact uploads
 - [x] **Pre-commit Hooks**: Automated code quality checks before commits
+- [x] **Package Restructure**: Package organized under `python/_utils/` for proper namespace
 
 ### Documentation & Developer Experience
-- [ ] **API Documentation**: Generate comprehensive API docs with Sphinx or mkdocs
 - [ ] **Code Examples**: Add more real-world usage examples and tutorials
 - [ ] **Type Stubs**: Complete type hints and generate .pyi stub files
-- [ ] **Changelog**: Maintain CHANGELOG.md for version tracking
-- [ ] **Contributing Guide**: Detailed CONTRIBUTING.md with development workflow
 
 ### Code Quality & Standards
 - [ ] **Type Hints**: Complete type annotations across all modules
@@ -782,7 +845,6 @@ This section tracks planned improvements and new features to enhance the library
 ### Community & Open Source
 - [x] **Issue Templates**: GitHub issue and PR templates
 - [ ] **Code of Conduct**: Community guidelines and code of conduct
-- [ ] **Security Policy**: SECURITY.md for responsible disclosure
 - [ ] **Examples Repository**: Separate repository with usage examples
 - [ ] **Blog Posts**: Technical blog posts showcasing features and use cases
 
