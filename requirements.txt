@@ -27,7 +27,7 @@ uvicorn>=0.23
 
 # HTTP Clients
 httpx>=0.24.0
-requests>=2.31.0
+requests>=2.32.0
 
 # Machine Learning
 numpy>=1.26
@@ -35,7 +35,9 @@ pandas>=2.0
 scikit-learn>=1.4
 
 # Tableau
-tableauserverclient>=0.26
+# Use version compatible with urllib3>=2.0 (tableauserverclient 0.38+ requires urllib3==2.x)
+tableauserverclient>=0.38
+urllib3>=2.0.0,<3.0
 
 # ============================================================================
 # Development Dependencies

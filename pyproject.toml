@@ -15,8 +15,8 @@ authors = [
 keywords = ["utilities", "fastapi", "aws", "alpaca", "data", "ml", "snowflake"]
 # All dependencies are required - no optional dependencies
 dependencies = [
-  # Alpaca Trading API
-  "alpaca-trade-api>=3.1.0",
+  # Alpaca Trading API - NOTE: Using custom REST API implementation, SDK not needed
+  # "alpaca-trade-api>=3.1.0",  # Removed - using REST APIs instead of SDK
   # AWS Services
   "boto3>=1.28",
   # Note: botocore is included with boto3, no need to specify separately
@@ -30,13 +30,16 @@ dependencies = [
   "uvicorn>=0.23",
   # HTTP Clients
   "httpx>=0.24.0",
-  "requests>=2.31.0",
+  "requests>=2.32.0",
+  # urllib3>=2.0 required by tableauserverclient>=0.38
+  "urllib3>=2.0.0,<3.0",
   # Machine Learning
   "numpy>=1.26",
   "pandas>=2.0",
   "scikit-learn>=1.4",
   # Tableau
-  "tableauserverclient>=0.26",
+  # Use version compatible with urllib3>=2.0 (tableauserverclient 0.38+ requires urllib3==2.x)
+  "tableauserverclient>=0.38",
   # Testing
   "pytest>=7.4.0",
   "pytest-cov>=4.1.0",
