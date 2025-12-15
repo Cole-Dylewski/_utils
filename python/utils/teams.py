@@ -9,8 +9,8 @@ elif "AWS_LAMBDA_FUNCTION_VERSION".lower() in env_keys:
 else:
     environment = "local"
 
-from _utils.aws import secrets
-from _utils.utils import sql
+from aws import secrets
+from utils import sql
 
 if environment in ["glue", "lambda"]:
     print(f"Running in {environment}, using default session.")
@@ -19,7 +19,7 @@ if environment in ["glue", "lambda"]:
     session = boto3.Session()
 else:
     print("Running locally, using _utils session.")
-    from _utils.aws import boto3_session
+    from aws import boto3_session
 
     session = boto3_session.Session()
 

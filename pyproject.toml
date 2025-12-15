@@ -67,15 +67,17 @@ dev = [
 Homepage = "https://github.com/Cole-Dylewski/_utils"
 
 [project.scripts]
-utils = "_utils.cli:main"
+utils = "cli:main"
 
 [tool.setuptools.packages.find]
 where = ["python"]
-include = ["_utils*"]
+include = ["*"]
+exclude = ["tests*"]
 namespaces = false
 
 [tool.pytest.ini_options]
 testpaths = ["python/tests"]
+pythonpath = ["python"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
@@ -84,12 +86,12 @@ addopts = [
   "--strict-markers",
   "--strict-config",
   "--tb=short",
-  "--cov=python/_utils",
+    "--cov=python",
   "--cov-report=term-missing",
   "--cov-report=html",
   "--cov-report=xml",
   "--cov-branch",
-  "--cov-fail-under=0",
+    "--cov-fail-under=80",
   "--durations=10",
   "-ra",
 ]
@@ -107,7 +109,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["python/_utils"]
+source = ["python"]
 omit = [
     "*/tests/*",
     "*/test_*.py",

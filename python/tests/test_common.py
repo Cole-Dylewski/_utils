@@ -23,7 +23,7 @@ class TestBasicUtils:
 def test_basic_imports():
     """Test that common modules can be imported."""
     try:
-        from _utils.common import basic
+        from common import basic
 
         assert basic is not None
     except ImportError as e:

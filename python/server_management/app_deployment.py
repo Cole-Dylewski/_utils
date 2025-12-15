@@ -14,10 +14,10 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from _utils.server_management.ansible import AnsibleHandler
-from _utils.server_management.credential_generator import CredentialGenerator
-from _utils.server_management.terraform import TerraformHandler
-from _utils.server_management.vault import VaultHandler
+from server_management.ansible import AnsibleHandler
+from server_management.credential_generator import CredentialGenerator
+from server_management.terraform import TerraformHandler
+from server_management.vault import VaultHandler
 
 logger = logging.getLogger(__name__)
 
@@ -246,7 +246,7 @@ class AppDeploymentConfig(ABC):
             # Load infrastructure credentials (Tailscale auth key, GitHub tokens, etc.)
             # Secret path: infra/* (outside base_path)
             # Create a temporary handler with base_path="infra" to access infra secrets
-            from _utils.server_management.vault import VaultHandler
+            from server_management.vault import VaultHandler
 
             infra_handler = VaultHandler(
                 vault_addr=vault.vault_addr,
@@ -428,7 +428,7 @@ class AppDeploymentConfig(ABC):
             # Check if tailscale_auth_key is in credentials.secrets
             if "tailscale_auth_key" in self.credentials.secrets:
                 # Create a temporary handler with base_path="infra" to access infra secrets
-                from _utils.server_management.vault import VaultHandler
+                from server_management.vault import VaultHandler
 
                 infra_handler = VaultHandler(
                     vault_addr=vault.vault_addr,

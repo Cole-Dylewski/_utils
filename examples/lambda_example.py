@@ -7,10 +7,10 @@ Demonstrates Lambda function with AWS integrations and error handling.
 import json
 from typing import Any
 
-from _utils.aws import s3, secrets
-from _utils.aws.aws_lambda import LambdaHandler
-from _utils.exceptions import AWSConnectionError, AWSOperationError
-from _utils.utils.logger import get_logger
+from aws import aws_lambda, s3, secrets
+from aws.aws_lambda import LambdaHandler
+from exceptions import AWSConnectionError, AWSOperationError
+from utils.logger import get_logger
 
 # Initialize logger
 logger = get_logger(__name__, use_json=True)

@@ -6,10 +6,9 @@ Demonstrates Django views and models with _utils integrations.
 
 from django.http import JsonResponse
 from django.views import View
-
-from _utils.exceptions import DatabaseError
-from _utils.utils.logger import get_logger
-from _utils.utils.sql import run_sql
+from exceptions import DatabaseError
+from utils.logger import get_logger
+from utils.sql import run_sql
 
 # Initialize logger
 logger = get_logger(__name__)

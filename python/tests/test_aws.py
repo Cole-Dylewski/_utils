@@ -18,7 +18,7 @@ class TestAWSUtils:
     def test_aws_imports(self):
         """Test that AWS modules can be imported."""
         try:
-            from _utils.aws import boto3_session, s3, secrets
+            from aws import boto3_session, s3, secrets
 
             assert s3 is not None
             assert secrets is not None

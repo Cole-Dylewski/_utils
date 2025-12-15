@@ -2,10 +2,18 @@
 Pytest configuration and shared fixtures.
 """
 
+import os
 from typing import Any
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+
+# Set test environment variables
+os.environ.setdefault("AWS_ACCESS_KEY_ID", "testing")
+os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "testing")
+os.environ.setdefault("AWS_DEFAULT_REGION", "us-east-1")
+os.environ.setdefault("AWS_SECURITY_TOKEN", "testing")
+os.environ.setdefault("AWS_SESSION_TOKEN", "testing")
 
 
 @pytest.fixture(scope="session")
@@ -33,6 +41,42 @@ def mock_boto3_client(monkeypatch: pytest.MonkeyPatch) -> Mock:
 
     monkeypatch.setattr("boto3.client", mock_boto3_client_func)
     return mock_client
+
+
+@pytest.fixture
+def moto_s3():
+    """Moto S3 mock for integration tests."""
+    try:
+        from moto import mock_s3
+
+        with mock_s3():
+            yield
+    except ImportError:
+        pytest.skip("moto not installed - skipping S3 mock")
+
+
+@pytest.fixture
+def moto_secretsmanager():
+    """Moto Secrets Manager mock for integration tests."""
+    try:
+        from moto import mock_secretsmanager
+
+        with mock_secretsmanager():
+            yield
+    except ImportError:
+        pytest.skip("moto not installed - skipping Secrets Manager mock")
+
+
+@pytest.fixture
+def moto_dynamodb():
+    """Moto DynamoDB mock for integration tests."""
+    try:
+        from moto import mock_dynamodb
+
+        with mock_dynamodb():
+            yield
+    except ImportError:
+        pytest.skip("moto not installed - skipping DynamoDB mock")
 
 
 @pytest.fixture
@@ -69,6 +113,34 @@ def sample_dataframe():
         pytest.skip("pandas not installed")
 
 
+@pytest.fixture
+def sample_dict_data():
+    """Sample dictionary data for testing."""
+    return {
+        "key1": "value1",
+        "key2": 123,
+        "key3": {"nested": "data"},
+        "key4": [1, 2, 3],
+    }
+
+
+@pytest.fixture
+def sample_json_string():
+    """Sample JSON string for testing."""
+    return '{"key1": "value1", "key2": 123}'
+
+
+@pytest.fixture
+def mock_redis():
+    """Mock Redis client for testing."""
+    mock_client = MagicMock()
+    mock_client.get.return_value = None
+    mock_client.set.return_value = True
+    mock_client.delete.return_value = 1
+    mock_client.exists.return_value = False
+    return mock_client
+
+
 @pytest.fixture(autouse=True)
 def reset_logging():
     """Reset logging configuration before each test."""
@@ -77,3 +149,17 @@ def reset_logging():
     logging.getLogger().handlers = []
     yield
     logging.getLogger().handlers = []
+
+
+@pytest.fixture
+def temp_file(tmp_path):
+    """Create a temporary file for testing."""
+    test_file = tmp_path / "test_file.txt"
+    test_file.write_text("test content")
+    return str(test_file)
+
+
+@pytest.fixture
+def temp_dir(tmp_path):
+    """Create a temporary directory for testing."""
+    return str(tmp_path)

@@ -34,7 +34,7 @@ class CognitoHandler:
                 raise ValueError(
                     "cognito_creds_secret_name parameter is required when cognito_app_client_id is not provided"
                 )
-            from _utils.aws import secrets
+            from aws import secrets
 
             secret_handler = secrets.SecretHandler()
             cognito_creds = secret_handler.get_secret(cognito_creds_secret_name)
@@ -47,7 +47,7 @@ class CognitoHandler:
         if session:
             self.session = session
         else:
-            from _utils.aws import boto3_session
+            from aws import boto3_session
 
             self.session = boto3_session.Session(
                 aws_access_key_id=aws_access_key_id,

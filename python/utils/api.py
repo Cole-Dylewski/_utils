@@ -2,10 +2,9 @@ import asyncio
 import json
 from typing import Any
 
+from aws import secrets
 import httpx
 import requests
-
-from _utils.aws import secrets
 
 
 # Common request function parameters

@@ -24,7 +24,7 @@ class CodebuildHandler:
             if session:
                 self.session = session
             else:
-                from _utils.aws import boto3_session
+                from aws import boto3_session
 
                 self.session = boto3_session.Session(
                     aws_access_key_id=aws_access_key_id,

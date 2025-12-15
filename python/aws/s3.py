@@ -32,7 +32,7 @@ class S3Handler:
         if session:
             self.session = session
         else:
-            from _utils.aws import boto3_session
+            from aws import boto3_session
 
             self.session = boto3_session.Session(
                 aws_access_key_id=aws_access_key_id,
@@ -340,7 +340,7 @@ class S3Handler:
         try:
             if not (access_key and secret_key):
                 if not self.secret_handler:
-                    from _utils.aws import secrets
+                    from aws import secrets
 
                     self.secret_handler = secrets.SecretHandler(session=self.session)
                 app_creds = self.secret_handler.get_secret(secret)
@@ -596,3 +596,80 @@ class S3Handler:
             if "upload_id" in locals():
                 logger.exception("Upload incomplete. You can resume later with the same UploadId.")
             return False
+
+
+# CLI functionality
+if __name__ == "__main__":
+    import argparse
+    import sys
+
+    parser = argparse.ArgumentParser(description="S3 utility CLI - Manage S3 buckets and objects")
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    # Upload command
+    upload_parser = subparsers.add_parser("upload", help="Upload file to S3")
+    upload_parser.add_argument("file", help="Local file path to upload")
+    upload_parser.add_argument("bucket", help="S3 bucket name")
+    upload_parser.add_argument("key", help="S3 object key")
+    upload_parser.add_argument("--region", help="AWS region")
+
+    # Download command
+    download_parser = subparsers.add_parser("download", help="Download file from S3")
+    download_parser.add_argument("bucket", help="S3 bucket name")
+    download_parser.add_argument("key", help="S3 object key")
+    download_parser.add_argument("--output", "-o", help="Output file path")
+    download_parser.add_argument("--region", help="AWS region")
+
+    # List command
+    list_parser = subparsers.add_parser("list", help="List objects in bucket")
+    list_parser.add_argument("bucket", help="S3 bucket name")
+    list_parser.add_argument("--prefix", help="Object key prefix")
+    list_parser.add_argument("--region", help="AWS region")
+
+    # Delete command
+    delete_parser = subparsers.add_parser("delete", help="Delete object from S3")
+    delete_parser.add_argument("bucket", help="S3 bucket name")
+    delete_parser.add_argument("key", help="S3 object key")
+    delete_parser.add_argument("--region", help="AWS region")
+
+    args = parser.parse_args()
+
+    if not args.command:
+        parser.print_help()
+        sys.exit(1)
+
+    try:
+        handler = (
+            S3Handler(region_name=args.region)
+            if hasattr(args, "region") and args.region
+            else S3Handler()
+        )
+
+        if args.command == "upload":
+            with open(args.file, "rb") as f:
+                handler.s3_client.upload_fileobj(f, args.bucket, args.key)
+            print(f"Uploaded {args.file} to s3://{args.bucket}/{args.key}")
+
+        elif args.command == "download":
+            output = args.output or args.key.split("/")[-1]
+            handler.s3_client.download_file(args.bucket, args.key, output)
+            print(f"Downloaded s3://{args.bucket}/{args.key} to {output}")
+
+        elif args.command == "list":
+            kwargs = {"Bucket": args.bucket}
+            if args.prefix:
+                kwargs["Prefix"] = args.prefix
+            response = handler.s3_client.list_objects_v2(**kwargs)
+            if "Contents" in response:
+                for obj in response["Contents"]:
+                    print(f"{obj['Key']} ({obj['Size']} bytes)")
+            else:
+                print("No objects found")
+
+        elif args.command == "delete":
+            handler.s3_client.delete_object(Bucket=args.bucket, Key=args.key)
+            print(f"Deleted s3://{args.bucket}/{args.key}")
+
+    except Exception as e:
+        logger.exception(f"S3 operation failed: {e}")
+        sys.exit(1)

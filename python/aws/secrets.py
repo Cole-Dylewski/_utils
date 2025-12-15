@@ -21,7 +21,7 @@ class SecretHandler:
         if session:
             self.session = session
         else:
-            from _utils.aws import boto3_session
+            from aws import boto3_session
 
             self.session = boto3_session.Session(
                 aws_access_key_id=aws_access_key_id,
@@ -118,3 +118,80 @@ class SecretHandler:
         )
         logger.info(f"Secret {secret_name} updated")
         return response
+
+
+# CLI functionality
+if __name__ == "__main__":
+    import argparse
+    import sys
+
+    parser = argparse.ArgumentParser(description="AWS Secrets Manager CLI - Manage secrets")
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    # Get command
+    get_parser = subparsers.add_parser("get", help="Get secret value")
+    get_parser.add_argument("secret_name", help="Secret name")
+    get_parser.add_argument("--key", help="Get specific key from JSON secret")
+    get_parser.add_argument("--region", help="AWS region")
+
+    # Set command
+    set_parser = subparsers.add_parser("set", help="Set secret value")
+    set_parser.add_argument("secret_name", help="Secret name")
+    set_parser.add_argument("value", help="Secret value (JSON string or plain text)")
+    set_parser.add_argument("--region", help="AWS region")
+
+    # Check command
+    check_parser = subparsers.add_parser("check", help="Check if secret exists")
+    check_parser.add_argument("secret_name", help="Secret name")
+    check_parser.add_argument("--region", help="AWS region")
+
+    # List command
+    list_parser = subparsers.add_parser("list", help="List all secrets")
+    list_parser.add_argument("--region", help="AWS region")
+
+    args = parser.parse_args()
+
+    if not args.command:
+        parser.print_help()
+        sys.exit(1)
+
+    try:
+        handler = (
+            SecretHandler(region_name=args.region)
+            if hasattr(args, "region") and args.region
+            else SecretHandler()
+        )
+
+        if args.command == "get":
+            secret = handler.get_secret(args.secret_name)
+            if args.key:
+                if isinstance(secret, dict) and args.key in secret:
+                    print(secret[args.key])
+                else:
+                    print(f"Key '{args.key}' not found in secret", file=sys.stderr)
+                    sys.exit(1)
+            else:
+                print(json.dumps(secret, indent=2))
+
+        elif args.command == "set":
+            try:
+                # Try to parse as JSON
+                value = json.loads(args.value)
+            except json.JSONDecodeError:
+                # If not JSON, treat as plain string
+                value = args.value
+            handler.update_secret(args.secret_name, value)
+            print(f"Secret {args.secret_name} updated")
+
+        elif args.command == "check":
+            exists = handler.check_secret_exists(args.secret_name)
+            print(f"Secret {args.secret_name} {'exists' if exists else 'does not exist'}")
+            sys.exit(0 if exists else 1)
+
+        elif args.command == "list":
+            # Note: This requires implementing list_secrets method or using boto3 directly
+            print("List command not yet implemented. Use AWS CLI: aws secretsmanager list-secrets")
+
+    except Exception as e:
+        logger.exception(f"Secret operation failed: {e}")
+        sys.exit(1)

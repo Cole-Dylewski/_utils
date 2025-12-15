@@ -3,9 +3,8 @@ from decimal import Decimal
 import ipaddress
 import uuid
 
+from common import basic  # Assumes custom utility for data type determination
 import pandas as pd
-
-from _utils.common import basic  # Assumes custom utility for data type determination
 
 # Descriptions of common Django model field types
 django_model_field_desc = {

@@ -4,13 +4,12 @@ FastAPI example application using _utils.
 Demonstrates integration with AWS, database operations, and structured logging.
 """
 
+from aws import s3
+from exceptions import AWSConnectionError, DatabaseError
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
-
-from _utils.aws import s3
-from _utils.exceptions import AWSConnectionError, DatabaseError
-from _utils.utils.logger import get_logger
-from _utils.utils.sql import run_sql
+from utils.logger import get_logger
+from utils.sql import run_sql
 
 # Initialize logger
 logger = get_logger(__name__)
