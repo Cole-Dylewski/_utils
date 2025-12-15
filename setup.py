@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 """
-Cross-platform virtual environment setup script for _utils.
+Unified cross-platform setup and activation script for _utils.
 
-This script works on Linux, macOS, and Windows to:
-1. Check Python version
-2. Create a virtual environment (.venv)
-3. Install the package with development dependencies
-4. Install pre-commit hooks
+This script handles:
+1. Virtual environment setup (create, install dependencies)
+2. Virtual environment activation (detects platform and shell)
 
 Usage:
-    python setup-venv.py
-    # or
-    python3 setup-venv.py
+    # Setup (creates venv and installs dependencies)
+    python setup.py
+
+    # Activate (activates the venv in current shell)
+    python setup.py activate
+    # or use the convenience alias:
+    source setup.py activate  # Unix
+    . setup.py activate       # Windows PowerShell (if configured)
 """
 
 import os
@@ -128,11 +131,19 @@ def upgrade_pip(venv_python: Path) -> bool:
 
 
 def install_package(venv_pip: Path) -> bool:
-    """Install package with development dependencies."""
-    print_status("Installing package with development dependencies...", "info")
-    returncode, _stdout, stderr = run_command(
-        [str(venv_pip), "install", "-e", ".[dev]"], check=False
-    )
+    """Install package with all dependencies from requirements.txt."""
+    print_status("Installing package with all dependencies...", "info")
+
+    # Check if requirements.txt exists
+    if Path("requirements.txt").exists():
+        returncode, _stdout, stderr = run_command(
+            [str(venv_pip), "install", "-r", "requirements.txt"], check=False
+        )
+    else:
+        # Fallback to editable install with dev extras
+        returncode, _stdout, stderr = run_command(
+            [str(venv_pip), "install", "-e", "."], check=False
+        )
 
     if returncode != 0:
         print_status(f"Error installing package: {stderr}", "error")
@@ -164,43 +175,85 @@ def install_precommit(venv_python: Path) -> bool:
     return True
 
 
-def print_activation_instructions() -> None:
-    """Print instructions for activating the virtual environment."""
+def get_activate_script() -> Path | None:
+    """Get the path to the activation script based on platform and shell."""
     system = platform.system()
+    venv_path = Path(".venv")
 
-    print_status("\n[OK] Development environment setup complete!\n", "success")
-    print_status("To activate the virtual environment:", "info")
+    if not venv_path.exists():
+        return None
+
+    # Detect shell
+    shell = os.environ.get("SHELL", "").lower()
 
     if system == "Windows":
-        print_status("  PowerShell:", "info")
-        print("    .venv\\Scripts\\Activate.ps1")
-        print_status("  Command Prompt:", "info")
-        print("    .venv\\Scripts\\activate.bat")
+        # Check for PowerShell
+        if "powershell" in os.environ.get("PSMODULEPATH", "").lower() or "pwsh" in shell:
+            activate = venv_path / "Scripts" / "Activate.ps1"
+            if activate.exists():
+                return activate
+        # Fallback to batch file
+        activate = venv_path / "Scripts" / "activate.bat"
+        if activate.exists():
+            return activate
+    # Unix-like systems
+    elif "fish" in shell:
+        activate = venv_path / "bin" / "activate.fish"
+        if activate.exists():
+            return activate
+    elif "csh" in shell or "tcsh" in shell:
+        activate = venv_path / "bin" / "activate.csh"
+        if activate.exists():
+            return activate
     else:
-        print_status("  Bash/Zsh:", "info")
-        print("    source .venv/bin/activate")
-        print_status("  Fish:", "info")
-        print("    source .venv/bin/activate.fish")
-        print_status("  Csh:", "info")
-        print("    source .venv/bin/activate.csh")
+        # Default to bash/zsh
+        activate = venv_path / "bin" / "activate"
+        if activate.exists():
+            return activate
 
-    print_status("\nTo run tests:", "info")
-    print("  pytest")
-
-    print_status("\nTo run linting:", "info")
-    print("  ruff check .")
-
-    print_status("\nTo format code:", "info")
-    print("  ruff format .")
-
-    print_status("\nTo run all quality checks:", "info")
-    print("  make quality")
-    print("  # or on Windows: python -m ruff check . && python -m mypy python")
-    print()
+    return None
 
 
-def main() -> int:
-    """Main setup function."""
+def activate_venv() -> int:
+    """Activate the virtual environment."""
+    venv_path = Path(".venv")
+
+    if not venv_path.exists():
+        print_status("Error: Virtual environment not found. Run 'python setup.py' first.", "error")
+        return 1
+
+    activate_script = get_activate_script()
+
+    if not activate_script:
+        print_status("Error: Could not find activation script", "error")
+        return 1
+
+    system = platform.system()
+
+    print_status("Activating virtual environment...", "info")
+    print_status(f"Found activation script: {activate_script}", "info")
+
+    # Print activation instructions (we can't actually activate from Python)
+    print_status("\nTo activate the virtual environment, run:", "info")
+
+    if system == "Windows":
+        if activate_script.suffix == ".ps1":
+            print("  .venv\\Scripts\\Activate.ps1")
+            print("\nOr in PowerShell:")
+            print("  & .venv\\Scripts\\Activate.ps1")
+        else:
+            print("  .venv\\Scripts\\activate.bat")
+    else:
+        print(f"  source {activate_script}")
+
+    print_status("\nNote: This script cannot activate the venv in your current shell.", "warning")
+    print_status("You must run the activation command above in your shell.", "warning")
+
+    return 0
+
+
+def setup_venv() -> int:
+    """Setup the virtual environment."""
     print_status("Setting up _utils development environment...\n", "info")
 
     # Check Python version
@@ -229,10 +282,32 @@ def main() -> int:
     # Install pre-commit hooks
     install_precommit(venv_python)
 
-    # Print instructions
-    print_activation_instructions()
+    # Print activation instructions
+    print_status("\n[OK] Development environment setup complete!\n", "success")
+    print_status("To activate the virtual environment:", "info")
+
+    system = platform.system()
+    if system == "Windows":
+        print("  PowerShell: .venv\\Scripts\\Activate.ps1")
+        print("  Command Prompt: .venv\\Scripts\\activate.bat")
+    else:
+        print("  Bash/Zsh: source .venv/bin/activate")
+        print("  Fish: source .venv/bin/activate.fish")
+
+    print_status("\nOr use: python setup.py activate", "info")
+    print_status("\nTo run tests: pytest", "info")
+    print_status("To run linting: ruff check .", "info")
+    print_status("To format code: ruff format .", "info")
+    print()
 
     return 0
+
+
+def main() -> int:
+    """Main function."""
+    if len(sys.argv) > 1 and sys.argv[1] == "activate":
+        return activate_venv()
+    return setup_venv()
 
 
 if __name__ == "__main__":
