@@ -314,14 +314,64 @@ def setup_venv() -> int:
 
 def setup():
     """
-    Minimal setup function for setuptools compatibility.
+    Setup function for setuptools compatibility.
 
     This is called by setuptools during package build/install.
-    The actual package configuration is in pyproject.toml via setuptools.build_meta.
-    This function exists only to satisfy setuptools' expectation of a setup() function.
+    Reads configuration from pyproject.toml and calls setuptools.setup().
     """
-    # The actual setup is handled by pyproject.toml
-    # This is just a placeholder to prevent setuptools errors
+    # Import setuptools
+    from setuptools import find_packages
+    from setuptools import setup as _setup
+
+    # Read pyproject.toml for configuration
+    try:
+        import tomllib  # Python 3.11+
+    except ImportError:
+        import tomli as tomllib  # Fallback for Python < 3.11
+
+    pyproject_path = Path(__file__).parent / "pyproject.toml"
+    if not pyproject_path.exists():
+        # Fallback minimal setup
+        _setup(
+            name="utils",
+            version="0.1.0",
+            packages=find_packages(where="python"),
+            package_dir={"": "python"},
+        )
+        return
+
+    with open(pyproject_path, "rb") as f:
+        config = tomllib.load(f)
+
+    project = config.get("project", {})
+    setuptools_config = config.get("tool", {}).get("setuptools", {})
+
+    # Get package configuration
+    packages_config = setuptools_config.get("packages", {})
+    if packages_config.get("find"):
+        find_config = packages_config["find"]
+        packages = find_packages(
+            where=find_config.get("where", ["python"])[0]
+            if isinstance(find_config.get("where"), list)
+            else find_config.get("where", "python"),
+        )
+        package_dir = {
+            "": find_config.get("where", ["python"])[0]
+            if isinstance(find_config.get("where"), list)
+            else find_config.get("where", "python")
+        }
+    else:
+        packages = []
+        package_dir = {}
+
+    # Call setuptools.setup() with configuration
+    _setup(
+        name=project.get("name", "utils"),
+        version=project.get("version", "0.1.0"),
+        description=project.get("description", ""),
+        packages=packages,
+        package_dir=package_dir,
+    )
 
 
 def main() -> int:
