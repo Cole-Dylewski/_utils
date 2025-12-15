@@ -35,3 +35,27 @@ class SNSHandler:
         except ClientError as e:
             logger.exception(f"Failed to initialize SNS client: {e}")
             raise
+
+    def publish_message(self, topic_arn, message, subject=None):
+        """
+        Publish a message to an SNS topic.
+
+        Args:
+            topic_arn (str): The ARN of the SNS topic.
+            message (str): The message to publish.
+            subject (str, optional): The subject of the message.
+
+        Returns:
+            dict: Response from SNS publish API containing MessageId.
+        """
+        try:
+            publish_params = {"TopicArn": topic_arn, "Message": message}
+            if subject:
+                publish_params["Subject"] = subject
+
+            response = self.sns_client.publish(**publish_params)
+            logger.info(f"Message published to {topic_arn}")
+            return response
+        except ClientError as e:
+            logger.exception(f"Failed to publish message to {topic_arn}: {e}")
+            raise
