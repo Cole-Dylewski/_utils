@@ -336,44 +336,29 @@ def setup():
 
 def main() -> int:
     """Main function."""
-    # Check if we're being called by setuptools during build
-    # setuptools calls setup.py with specific commands like 'egg_info', 'build', etc.
-    if len(sys.argv) > 1:
-        setuptools_commands = {
-            "egg_info",
-            "build",
-            "build_py",
-            "build_ext",
-            "build_clib",
-            "build_scripts",
-            "install",
-            "install_lib",
-            "install_headers",
-            "install_scripts",
-            "install_data",
-            "sdist",
-            "bdist",
-            "bdist_dumb",
-            "bdist_rpm",
-            "bdist_wininst",
-            "bdist_wheel",
-            "check",
-            "register",
-            "upload",
-            "develop",
-        }
-        if sys.argv[1] in setuptools_commands:
-            # We're being called by setuptools, call setup() function
-            # The actual build uses pyproject.toml via setuptools.build_meta,
-            # but setuptools may still check for setup.py
-            setup()
-            return 0
+    # Default behavior: be safe and assume we're being called by setuptools
+    # Only run dev setup if explicitly requested
 
-    # Run custom dev setup logic
+    # Explicit dev setup commands
+    if len(sys.argv) == 1:
+        # No arguments - user wants dev setup
+        return setup_venv()
+
     if len(sys.argv) > 1 and sys.argv[1] == "activate":
+        # Explicit activate command
         return activate_venv()
-    return setup_venv()
+
+    # All other cases: assume setuptools is calling us
+    # This includes setuptools commands and any other unknown arguments
+    # The actual build uses pyproject.toml via setuptools.build_meta,
+    # but setuptools may still check for setup.py
+    setup()
+    return 0
 
 
+# Only execute main() if this file is run directly as a script
+# When setuptools imports this file, it will only get the setup() function
+# and won't execute the dev environment setup code
 if __name__ == "__main__":
+    # Execute main() which handles both setuptools calls and dev setup
     sys.exit(main())
