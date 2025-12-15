@@ -58,5 +58,10 @@ coverage>=7.3.0
 build>=1.0.0
 twine>=4.0.0
 
+# Documentation
+mkdocs>=1.5.0
+mkdocs-material>=9.0.0
+mkdocstrings[python]>=0.23.0
+
 # Vault Integration (for testing)
 hvac>=1.0.0
