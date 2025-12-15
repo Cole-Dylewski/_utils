@@ -22,84 +22,126 @@ _utils is a modular utility package designed to streamline development across mu
 pip install _utils
 ```
 
-### All Dependencies Included
+### Optional Dependencies
 
-All dependencies are installed by default. The package includes:
-- AWS services (boto3, botocore)
-- Database operations (SQLAlchemy, psycopg, asyncpg)
-- Alpaca trading APIs (alpaca-trade-api)
-- FastAPI support (fastapi, pydantic, uvicorn)
-- Machine learning utilities (numpy, pandas, scikit-learn)
-- Tableau integration (tableauserverclient)
-- Testing and development tools (pytest, ruff, mypy, etc.)
+Install only the features you need:
+
+```bash
+# AWS services
+pip install _utils[aws]
+
+# Database operations
+pip install _utils[db]
+
+# Alpaca trading APIs
+pip install _utils[alpaca]
+
+# FastAPI support
+pip install _utils[fastapi]
+
+# Machine learning utilities
+pip install _utils[ml]
 
 # Tableau integration
 pip install _utils[tableau]
+
+# Development dependencies (for contributing)
+pip install _utils[dev]
 ```
 
 ## Project Structure
 
+The package structure is organized under the `python/` directory:
+
 ```
-_utils/
-├── alpaca/              # Alpaca trading API clients
-│   ├── broker_api/      # Broker API operations
-│   └── trader_api/      # Trader API operations
-├── aws/                 # AWS service utilities
-│   ├── aws_lambda.py    # Lambda function utilities
-│   ├── boto3_session.py # AWS session management
-│   ├── cloudwatch.py    # CloudWatch operations
-│   ├── codebuild.py     # CodeBuild project management
-│   ├── cognito.py        # Cognito user management
-│   ├── dynamodb.py      # DynamoDB operations
-│   ├── ecs.py           # ECS service management
-│   ├── elasticache.py   # ElastiCache utilities
-│   ├── glue.py          # AWS Glue job management
-│   ├── s3.py            # S3 file operations
-│   ├── secrets.py       # Secrets Manager operations
-│   ├── sns.py           # SNS notifications
-│   └── transfer_family.py # Transfer Family SFTP management
-├── common/              # Common utilities
-│   ├── basic.py         # Basic helper functions
-│   ├── django_request.py # Django request utilities
-│   ├── models.py        # Common models
-│   └── requests.py      # HTTP request utilities
-├── models/              # Model utilities
-│   ├── django_models.py # Django model helpers
-│   └── sql.py           # SQL model utilities
-├── snowflake/           # Snowflake integration
-│   └── snowpark.py      # Snowpark client wrapper
-├── sql/                 # SQL operations
-│   ├── io.py            # SQL I/O operations
-│   └── models.py        # SQL model definitions
-├── server_management/   # Server management and infrastructure automation
-│   ├── ansible.py       # Ansible playbook execution
-│   ├── app_deployment.py # Application deployment framework
-│   ├── credential_generator.py # Credential generation utilities
-│   ├── gpu_utils.py     # GPU memory management utilities
-│   ├── terraform.py     # Terraform project management
-│   └── vault.py         # HashiCorp Vault integration
-├── tableau/             # Tableau integration
-│   └── tableau_client.py # Tableau Server API client
-├── tests/               # Test utilities
-└── utils/                # General utilities
-    ├── api.py           # API request utilities
-    ├── azure.py         # Azure integration
-    ├── cryptography.py  # Encryption/decryption
-    ├── dataframe.py     # DataFrame operations
-    ├── dict_json.py     # Dictionary/JSON utilities
-    ├── email.py         # Email sending
-    ├── files.py         # File operations
-    ├── formatting_tools.py # Text formatting
-    ├── git.py           # Git operations
-    ├── log_print.py     # Logging utilities
-    ├── misc.py          # Miscellaneous helpers
-    ├── redis.py         # Redis operations
-    ├── requirements.py  # Requirements management
-    ├── sql.py           # SQL utilities
-    ├── sync_async.py    # Async/sync utilities
-    ├── tableau.py       # Tableau utilities
-    └── teams.py         # Microsoft Teams integration
+_utils/                    # Repository root
+├── python/                 # Package source code
+│   ├── alpaca/             # Alpaca trading API clients
+│   │   ├── broker_api/     # Broker API operations
+│   │   │   └── accounts.py
+│   │   ├── trader_api/      # Trader API operations
+│   │   │   ├── accounts.py
+│   │   │   ├── assets.py
+│   │   │   ├── calendar.py
+│   │   │   ├── clock.py
+│   │   │   ├── crypto.py
+│   │   │   ├── data/        # Market data APIs
+│   │   │   ├── history.py
+│   │   │   ├── orders.py
+│   │   │   ├── portfolio.py
+│   │   │   └── watchlists.py
+│   │   ├── broker_client.py
+│   │   └── trading_client.py
+│   ├── aws/                 # AWS service utilities
+│   │   ├── aws_lambda.py    # Lambda function utilities
+│   │   ├── boto3_session.py # AWS session management
+│   │   ├── cloudwatch.py    # CloudWatch operations
+│   │   ├── codebuild.py     # CodeBuild project management
+│   │   ├── cognito.py       # Cognito user management
+│   │   ├── dynamodb.py      # DynamoDB operations
+│   │   ├── ecs.py           # ECS service management
+│   │   ├── elasticache.py   # ElastiCache utilities
+│   │   ├── glue.py          # AWS Glue job management
+│   │   ├── s3.py            # S3 file operations
+│   │   ├── secrets.py       # Secrets Manager operations
+│   │   ├── sns.py           # SNS notifications
+│   │   └── transfer_family.py # Transfer Family SFTP management
+│   ├── common/              # Common utilities
+│   │   ├── basic.py         # Basic helper functions
+│   │   ├── django_request.py # Django request utilities
+│   │   ├── models.py        # Common models
+│   │   └── requests.py      # HTTP request utilities
+│   ├── models/              # Model utilities
+│   │   ├── django_models.py # Django model helpers
+│   │   └── sql.py           # SQL model utilities
+│   ├── snowflake/           # Snowflake integration
+│   │   └── snowpark.py      # Snowpark client wrapper
+│   ├── sql/                 # SQL operations
+│   │   ├── io.py            # SQL I/O operations
+│   │   └── models.py        # SQL model definitions
+│   ├── server_management/   # Server management and infrastructure automation
+│   │   ├── ansible.py       # Ansible playbook execution
+│   │   ├── app_deployment.py # Application deployment framework
+│   │   ├── credential_generator.py # Credential generation utilities
+│   │   ├── gpu_utils.py     # GPU memory management utilities
+│   │   ├── terraform.py     # Terraform project management
+│   │   └── vault.py         # HashiCorp Vault integration
+│   ├── tableau/             # Tableau integration
+│   │   └── tableau_client.py # Tableau Server API client
+│   ├── utils/               # General utilities
+│   │   ├── api.py           # API request utilities
+│   │   ├── azure.py         # Azure integration
+│   │   ├── cache.py         # Caching utilities
+│   │   ├── cryptography.py  # Encryption/decryption
+│   │   ├── dataframe.py     # DataFrame operations
+│   │   ├── dict_json.py     # Dictionary/JSON utilities
+│   │   ├── email.py         # Email sending
+│   │   ├── files.py         # File operations
+│   │   ├── formatting_tools.py # Text formatting
+│   │   ├── git.py           # Git operations
+│   │   ├── log_print.py     # Logging utilities
+│   │   ├── logger.py        # Structured logging
+│   │   ├── misc.py          # Miscellaneous helpers
+│   │   ├── redis.py         # Redis operations
+│   │   ├── requirements.py  # Requirements management
+│   │   ├── resilience.py    # Retry and rate limiting
+│   │   ├── sql.py           # SQL utilities
+│   │   ├── sync_async.py    # Async/sync utilities
+│   │   ├── tableau.py       # Tableau utilities
+│   │   └── teams.py         # Microsoft Teams integration
+│   ├── tests/               # Test suite
+│   │   └── [test files]     # Comprehensive test coverage
+│   ├── cli.py               # Command-line interface
+│   ├── exceptions.py        # Custom exceptions
+│   └── __init__.py          # Package initialization
+├── .github/                 # GitHub Actions workflows
+├── docs/                    # Documentation (if applicable)
+├── pyproject.toml           # Project configuration
+├── pytest.ini              # Pytest configuration
+└── README.md                # This file
 ```
+
+**Note:** When installed, modules are imported directly from their top-level names (e.g., `from aws import s3`, `from alpaca import TraderClient`, `from utils import sql`).
 
 ## Module Descriptions
 
