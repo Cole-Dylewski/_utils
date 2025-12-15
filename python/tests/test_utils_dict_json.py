@@ -38,3 +38,14 @@ class TestDictJsonUtils:
         nested = {"items": [1, 2, 3]}
         flattened = dict_json.flatten_dict(nested)
         assert flattened["items"] == "1,2,3"
+
+    def test_flatten_dict_empty(self):
+        """Test flattening empty dictionary."""
+        flattened = dict_json.flatten_dict({})
+        assert flattened == {}
+
+    def test_flatten_dict_nested_empty(self):
+        """Test flattening nested dictionary with empty inner dict."""
+        nested = {"outer": {}}
+        flattened = dict_json.flatten_dict(nested)
+        assert "outer" in flattened or flattened == {}

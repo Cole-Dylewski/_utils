@@ -68,14 +68,32 @@ class TestTraderClient:
         assert order is not None
         mock_api_instance.submit_order.assert_called_once()
 
-    @patch("alpaca.trading_client.TradeAPI")
-    def test_get_positions(self, mock_trade_api):
+    @patch("alpaca.trading_client.portfolio.get_positions")
+    def test_get_positions(self, mock_get_positions):
         """Test getting positions."""
-        mock_api_instance = MagicMock()
-        mock_api_instance.list_positions.return_value = []
-        mock_trade_api.return_value = mock_api_instance
+        mock_get_positions.return_value = []
 
         client = TraderClient(api_key="test-key", api_secret="test-secret")
         positions = client.get_positions()
         assert isinstance(positions, list)
-        mock_api_instance.list_positions.assert_called_once()
+        mock_get_positions.assert_called_once()
+
+    @patch("alpaca.trading_client.accounts.get_account_configurations")
+    def test_get_account_configurations(self, mock_get_config):
+        """Test getting account configurations."""
+        mock_get_config.return_value = {"pattern_day_trader": False}
+
+        client = TraderClient(api_key="test-key", api_secret="test-secret")
+        config = client.get_account_configurations()
+        assert config is not None
+        mock_get_config.assert_called_once()
+
+    @patch("alpaca.trading_client.orders.cancel_order")
+    def test_cancel_order(self, mock_cancel):
+        """Test canceling an order."""
+        mock_cancel.return_value = {}
+
+        client = TraderClient(api_key="test-key", api_secret="test-secret")
+        result = client.cancel_order("test-order-id")
+        assert result is not None
+        mock_cancel.assert_called_once()

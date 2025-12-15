@@ -44,3 +44,16 @@ class TestBasicUtilsExpanded:
         """Test that basic module can be imported."""
         assert basic is not None
         assert hasattr(basic, "get_uuid")
+
+    def test_get_list_of_words(self):
+        """Test getting list of words (requires network)."""
+        # This requires network access, so we'll skip in unit tests
+        # or mock the requests call
+        with patch("common.basic.requests.get") as mock_get:
+            mock_response = MagicMock()
+            mock_response.text = "word1\nword2\nword3\n"
+            mock_get.return_value = mock_response
+
+            words = basic.get_list_of_words()
+            assert isinstance(words, list)
+            assert len(words) > 0

@@ -54,3 +54,17 @@ class TestDataFrameUtilsExpanded:
         normalized = dataframe.normalize_col_names(cols)
         assert isinstance(normalized, list)
         assert len(normalized) == len(cols)
+
+    def test_build_rand_df_custom_columns(self):
+        """Test building random DataFrame with custom columns."""
+        custom_cols = ["col1", "col2", "col3"]
+        df = dataframe.build_rand_df(randRange=50, colNum=3, rowNum=5, columns=custom_cols)
+        assert list(df.columns) == custom_cols
+        assert len(df) == 5
+
+    def test_build_rand_df_float_only(self):
+        """Test building random DataFrame with floats only."""
+        df = dataframe.build_rand_df(randRange=100, colNum=3, rowNum=10, intOnly=False)
+        assert isinstance(df, pd.DataFrame)
+        # Check that values are floats (not just ints)
+        assert df.dtypes.iloc[0] in [float, "float64"]

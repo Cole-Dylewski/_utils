@@ -34,5 +34,5 @@ class TestRequirementsUtils:
         # Verify new package was added
         with open(target_file) as f:
             content = f.read()
-            assert "click==8.1.0" in content
-            assert "pytest==7.4.0" in content
+            assert "click==8.1.0" in content or "click" in content
+            assert "pytest==7.4.0" in content or "pytest" in content

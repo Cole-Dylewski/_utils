@@ -16,9 +16,44 @@ class TestEmailUtils:
         """Test that email module can be imported."""
         assert email is not None
 
-    @patch("utils.email.boto3_session.Session")
-    @patch("utils.email.ses_client")
-    def test_send_email(self, mock_ses, mock_session):
-        """Test sending email (mocked)."""
-        # Add specific tests based on email.py implementation
-        assert email is not None
+    @patch("utils.email.secrets.SecretHandler")
+    def test_send_email_with_secret(self, mock_secrets):
+        """Test sending email with Secrets Manager."""
+        mock_secret_handler = MagicMock()
+        mock_secret_handler.get_secret.return_value = {
+            "username": "test@example.com",
+            "password": "test-pass",
+        }
+        mock_secrets.return_value = mock_secret_handler
+
+        with patch("utils.email.smtplib.SMTP") as mock_smtp:
+            mock_server = MagicMock()
+            mock_smtp.return_value = mock_server
+
+            email.send_email(
+                email_body="Test body",
+                email_subject="Test Subject",
+                to="recipient@example.com",
+                email_sender="sender@example.com",
+                email_creds_secret_name="email-secret",
+            )
+            mock_server.sendmail.assert_called_once()
+
+    def test_send_email_missing_sender(self):
+        """Test send_email without sender raises error."""
+        with pytest.raises(ValueError, match="email_sender parameter is required"):
+            email.send_email(
+                email_body="Test",
+                email_subject="Test",
+                to="test@example.com",
+            )
+
+    def test_send_email_missing_secret(self):
+        """Test send_email without secret name raises error."""
+        with pytest.raises(ValueError, match="email_creds_secret_name parameter is required"):
+            email.send_email(
+                email_body="Test",
+                email_subject="Test",
+                to="test@example.com",
+                email_sender="sender@example.com",
+            )

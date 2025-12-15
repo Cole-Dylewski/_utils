@@ -50,3 +50,9 @@ class TestFileUtilsExpanded:
         # This test would require actual PDF files or mocking
         # For now, just test the function exists
         assert hasattr(files, "merge_files")
+
+    def test_merge_files_unsupported_format(self, temp_dir):
+        """Test merging files with unsupported format raises error."""
+        output = os.path.join(temp_dir, "output.xyz")
+        with pytest.raises(ValueError, match="Unsupported output file type"):
+            files.merge_files(output, ["file1.txt", "file2.txt"])

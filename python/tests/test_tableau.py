@@ -46,3 +46,19 @@ class TestTableauClient:
         with client:
             client.login()
             mock_server_instance.auth.sign_in.assert_called_once()
+
+    @patch("tableau.tableau_client.aws_secrets.SecretHandler")
+    def test_tableau_client_with_secret(self, mock_secrets):
+        """Test Tableau client initialization with Secrets Manager."""
+        mock_secret_handler = MagicMock()
+        mock_secret_handler.get_secret.return_value = {
+            "username": "secret-user",
+            "password": "secret-pass",
+            "server_url": "https://tableau.example.com",
+        }
+        mock_secrets.return_value = mock_secret_handler
+
+        with patch("tableau.tableau_client.TableauAuth"), patch("tableau.tableau_client.Server"):
+            client = tableau_client.tableau_client(tableau_creds_secret_name="tableau-secret")
+            assert client.username == "secret-user"
+            assert client.password == "secret-pass"

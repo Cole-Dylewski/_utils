@@ -54,3 +54,17 @@ class TestMiscUtils:
         serializable = misc.make_serializable(data)
         assert isinstance(serializable["date"], str)
         assert isinstance(serializable["normal"], str)
+
+    def test_print_nested(self, capsys):
+        """Test printing nested data structures."""
+        nested = {"a": {"b": "value"}}
+        misc.print_nested(nested)
+        captured = capsys.readouterr()
+        assert "a" in captured.out or "value" in captured.out
+
+    def test_format_nested(self):
+        """Test formatting nested data structures."""
+        nested = {"a": {"b": "value"}}
+        formatted = misc.format_nested(nested)
+        assert isinstance(formatted, str)
+        assert "a" in formatted or "value" in formatted

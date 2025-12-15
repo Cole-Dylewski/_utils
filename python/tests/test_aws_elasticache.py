@@ -32,3 +32,26 @@ class TestElastiCacheHandler:
 
         handler = ElastiCacheHandler(session=mock_session_obj)
         assert handler.session == mock_session_obj
+
+    @patch("aws.elasticache.boto3_session.Session")
+    def test_generate_redis_auth_token(self, mock_session):
+        """Test generating Redis auth token."""
+        mock_session_instance = MagicMock()
+        mock_session_instance.client.return_value = MagicMock()
+        mock_session.return_value = mock_session_instance
+
+        handler = ElastiCacheHandler(session=mock_session_instance)
+        token = handler.generate_redis_auth_token(length=32)
+        assert isinstance(token, str)
+        assert len(token) == 32
+
+    @patch("aws.elasticache.boto3_session.Session")
+    def test_generate_redis_auth_token_invalid_length(self, mock_session):
+        """Test generating Redis auth token with invalid length raises error."""
+        mock_session_instance = MagicMock()
+        mock_session_instance.client.return_value = MagicMock()
+        mock_session.return_value = mock_session_instance
+
+        handler = ElastiCacheHandler(session=mock_session_instance)
+        with pytest.raises(ValueError, match="Token length must be between"):
+            handler.generate_redis_auth_token(length=10)

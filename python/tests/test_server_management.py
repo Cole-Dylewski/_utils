@@ -45,6 +45,29 @@ class TestTerraformHandler:
         assert result is not None
         mock_subprocess.assert_called()
 
+    def test_terraform_handler_invalid_directory(self):
+        """Test TerraformHandler with invalid directory raises error."""
+        with pytest.raises(ValueError, match="does not exist"):
+            TerraformHandler(project_dir="./non-existent-directory")
+
+    @patch("server_management.terraform.subprocess.run")
+    def test_terraform_destroy(self, mock_subprocess):
+        """Test terraform destroy."""
+        mock_subprocess.return_value = MagicMock(returncode=0)
+        handler = TerraformHandler(project_dir="./test")
+        result = handler.destroy()
+        assert result is not None
+        mock_subprocess.assert_called()
+
+    @patch("server_management.terraform.subprocess.run")
+    def test_terraform_output(self, mock_subprocess):
+        """Test terraform output."""
+        mock_subprocess.return_value = MagicMock(returncode=0, stdout='{"key": "value"}')
+        handler = TerraformHandler(project_dir="./test")
+        output = handler.output()
+        assert isinstance(output, dict)
+        mock_subprocess.assert_called()
+
 
 @pytest.mark.unit
 class TestAnsibleHandler:
