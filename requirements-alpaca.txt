@@ -1,6 +1,0 @@
-# Alpaca trading API dependencies
-# Install with: pip install -r requirements-alpaca.txt
-# Or use: pip install -e ".[alpaca]"
-
-alpaca-trade-api>=3.1.0
-pandas>=2.0
