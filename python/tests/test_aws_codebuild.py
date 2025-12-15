@@ -40,15 +40,33 @@ class TestCodebuildHandler:
         mock_session_instance = MagicMock()
         mock_codebuild_client = MagicMock()
         mock_codebuild_client.batch_get_projects.return_value = {
-            "projects": [{"name": "test-project", "description": "Test project"}]
+            "projects": [
+                {
+                    "name": "test-project",
+                    "description": "Test project",
+                    "source": {"type": "S3", "location": "bucket/key"},
+                    "artifacts": {"type": "NO_ARTIFACTS"},
+                    "environment": {
+                        "type": "LINUX_CONTAINER",
+                        "image": "aws/codebuild/standard:5.0",
+                    },
+                    "serviceRole": "arn:aws:iam::123456789012:role/CodeBuildServiceRole",
+                }
+            ]
         }
-        mock_session_instance.client.return_value = mock_codebuild_client
+        # Configure client() to return codebuild_client for "codebuild" and logs_client for "logs"
+        mock_logs_client = MagicMock()
+        mock_session_instance.client.side_effect = lambda service, **kwargs: (
+            mock_codebuild_client if service == "codebuild" else mock_logs_client
+        )
         mock_session.return_value = mock_session_instance
 
         handler = CodebuildHandler(session=mock_session_instance)
         config = handler.get_project_config("test-project")
         assert config is not None
-        mock_codebuild_client.batch_get_projects.assert_called_once()
+        assert config["name"] == "test-project"
+        assert config["description"] == "Test project"
+        mock_codebuild_client.batch_get_projects.assert_called_once_with(names=["test-project"])
 
     @patch("aws.boto3_session.Session")
     def test_get_project_config_not_found(self, mock_session):
