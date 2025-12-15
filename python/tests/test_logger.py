@@ -120,3 +120,42 @@ class TestConfigureLogging:
         except Exception:
             # structlog might not be available
             pytest.skip("structlog not available")
+
+    def test_logger_merge_context(self):
+        """Test logger context merging."""
+        logger = StructuredLogger("test_module", extra_context={"base": "value"})
+        merged = logger._merge_context(key="value")
+        assert "base" in merged
+        assert merged["key"] == "value"
+
+    def test_logger_setup_with_level(self):
+        """Test logger setup with custom level."""
+        logger = StructuredLogger("test_module", level=logging.WARNING)
+        assert logger._logger.level == logging.WARNING
+
+    def test_logger_setup_json_mode(self):
+        """Test logger setup in JSON mode."""
+        logger = StructuredLogger("test_module", use_json=True)
+        # Should not raise exception
+        logger.info("Test message")
+        assert logger.use_json is True
+
+    def test_configure_logging_custom_format(self):
+        """Test configure logging with custom format string."""
+        configure_logging(level="INFO", format_string="%(message)s")
+        logger = logging.getLogger("test")
+        assert logger.level <= logging.INFO
+
+    def test_logger_setup_logger_method(self):
+        """Test logger _setup_logger method."""
+        logger = StructuredLogger("test_module")
+        # _setup_logger is called in __init__, verify it worked
+        assert logger._logger is not None
+        assert logger._logger.name == "test_module"
+
+    def test_logger_with_structlog_unavailable(self):
+        """Test logger behavior when structlog is not available."""
+        # This tests the fallback behavior
+        logger = StructuredLogger("test_module", use_json=False)
+        logger.info("Test message")
+        assert logger.use_json is False

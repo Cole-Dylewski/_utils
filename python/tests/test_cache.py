@@ -145,3 +145,89 @@ class TestCache:
         assert "cache_type" in stats
         assert isinstance(stats["total_keys"], int)
         assert isinstance(stats["active_keys"], int)
+
+    def test_cache_with_key_prefix(self):
+        """Test cache decorator with key prefix."""
+        from utils.cache import cache
+
+        call_count = 0
+
+        @cache(ttl=10.0, key_prefix="test_prefix")
+        def prefixed_func(x):
+            nonlocal call_count
+            call_count += 1
+            return x * 2
+
+        result1 = prefixed_func(5)
+        assert result1 == 10
+        assert call_count == 1
+
+        result2 = prefixed_func(5)
+        assert result2 == 10
+        assert call_count == 1  # Should use cache
+
+    @pytest.mark.asyncio
+    async def test_cache_with_redis(self):
+        """Test cache decorator with Redis (mocked)."""
+        from unittest.mock import AsyncMock, MagicMock
+
+        from utils.cache import cache
+
+        mock_redis = MagicMock()
+        mock_redis.get_key = AsyncMock(return_value=None)
+        mock_redis.set_key = AsyncMock(return_value=None)
+
+        call_count = 0
+
+        @cache(ttl=10.0, use_redis=True, redis_handler=mock_redis)
+        async def redis_cached_func(x):
+            nonlocal call_count
+            call_count += 1
+            return x * 2
+
+        result = await redis_cached_func(5)
+        assert result == 10
+        assert call_count == 1
+        mock_redis.get_key.assert_called_once()
+        mock_redis.set_key.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_cache_with_redis_hit(self):
+        """Test cache decorator with Redis cache hit."""
+        from unittest.mock import AsyncMock, MagicMock
+
+        from utils.cache import cache
+
+        mock_redis = MagicMock()
+        mock_redis.get_key = AsyncMock(return_value={"value": 10})
+        mock_redis.set_key = AsyncMock(return_value=None)
+
+        call_count = 0
+
+        @cache(ttl=10.0, use_redis=True, redis_handler=mock_redis)
+        async def redis_cached_func(x):
+            nonlocal call_count
+            call_count += 1
+            return x * 2
+
+        result = await redis_cached_func(5)
+        assert result == 10
+        assert call_count == 0  # Should use cache
+        mock_redis.get_key.assert_called_once()
+        mock_redis.set_key.assert_not_called()
+
+    def test_make_cache_key(self):
+        """Test cache key generation."""
+        from utils.cache import _make_cache_key
+
+        def test_func(a, b):
+            return a + b
+
+        key1 = _make_cache_key(test_func, 1, 2)
+        key2 = _make_cache_key(test_func, 1, 2)
+        key3 = _make_cache_key(test_func, 2, 3)
+
+        assert key1 == key2  # Same args should produce same key
+        assert key1 != key3  # Different args should produce different key
+        assert isinstance(key1, str)
+        assert len(key1) == 32  # MD5 hash length
