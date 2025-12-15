@@ -8,6 +8,25 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
+# Register custom markers to avoid warnings with --strict-markers
+# Markers are also defined in pytest.ini and pyproject.toml, but registering here ensures they're available
+pytest_plugins = []
+
+
+def pytest_configure(config):
+    """Register custom markers."""
+    config.addinivalue_line("markers", "unit: Unit tests (fast, no external dependencies)")
+    config.addinivalue_line("markers", "integration: Integration tests (may use mocks)")
+    config.addinivalue_line("markers", "slow: Slow running tests")
+    config.addinivalue_line("markers", "aws: Tests requiring AWS services")
+    config.addinivalue_line("markers", "alpaca: Tests requiring Alpaca API")
+    config.addinivalue_line("markers", "vault: Tests requiring Vault")
+    config.addinivalue_line("markers", "terraform: Tests requiring Terraform")
+    config.addinivalue_line("markers", "ansible: Tests requiring Ansible")
+    config.addinivalue_line("markers", "requires_network: Tests requiring network access")
+    config.addinivalue_line("markers", "requires_docker: Tests requiring Docker")
+
+
 # Set test environment variables
 os.environ.setdefault("AWS_ACCESS_KEY_ID", "testing")
 os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "testing")
