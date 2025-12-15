@@ -86,13 +86,43 @@ class TestCodebuildHandler:
         """Test starting a CodeBuild project."""
         mock_session_instance = MagicMock()
         mock_codebuild_client = MagicMock()
+        mock_logs_client = MagicMock()
+
+        # Mock start_build response
         mock_codebuild_client.start_build.return_value = {
             "build": {"id": "test-build-id", "projectName": "test-project"}
         }
-        mock_session_instance.client.return_value = mock_codebuild_client
+
+        # Mock batch_get_builds to return a completed build (to avoid infinite loop)
+        mock_codebuild_client.batch_get_builds.return_value = {
+            "builds": [
+                {
+                    "id": "test-build-id",
+                    "buildStatus": "SUCCEEDED",
+                    "logs": {
+                        "groupName": "/aws/codebuild/test-project",
+                        "streamName": "test-build-id",
+                    },
+                }
+            ]
+        }
+        mock_codebuild_client.meta.region_name = "us-east-1"
+
+        # Mock logs client
+        mock_logs_client.get_log_events.return_value = {
+            "events": [{"message": "Build log message"}]
+        }
+
+        # Configure client() to return appropriate clients
+        mock_session_instance.client.side_effect = lambda service, **kwargs: (
+            mock_codebuild_client if service == "codebuild" else mock_logs_client
+        )
         mock_session.return_value = mock_session_instance
 
         handler = CodebuildHandler(session=mock_session_instance)
         response = handler.start_build("test-project")
         assert response is not None
-        mock_codebuild_client.start_build.assert_called_once()
+        assert response["build_status"] == "SUCCEEDED"
+        assert isinstance(response["logs"], list)
+        mock_codebuild_client.start_build.assert_called_once_with(projectName="test-project")
+        mock_codebuild_client.batch_get_builds.assert_called_once_with(ids=["test-build-id"])
