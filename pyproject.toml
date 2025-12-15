@@ -23,6 +23,7 @@ dependencies = [
   # Database
   "SQLAlchemy>=2.0",
   "psycopg[binary]>=3.1",
+  "psycopg2-binary>=2.9.0",  # Required for legacy code using psycopg2
   "asyncpg",
   # FastAPI
   "fastapi>=0.110",
@@ -73,6 +74,9 @@ dependencies = [
   # CLI and Logging
   "click>=8.1.0",
   "structlog>=23.0.0",
+  # Additional Utilities
+  "redis>=4.0.0",  # Redis client for caching and utilities
+  "nest_asyncio>=1.5.0",  # For running async code in sync contexts
 ]
 
 # Optional dependencies kept for backward compatibility but all are now in base dependencies
