@@ -45,15 +45,15 @@ class TestBasicUtilsExpanded:
         assert basic is not None
         assert hasattr(basic, "get_uuid")
 
-    def test_get_list_of_words(self):
+    @patch("requests.get")
+    def test_get_list_of_words(self, mock_get):
         """Test getting list of words (requires network)."""
-        # This requires network access, so we'll skip in unit tests
-        # or mock the requests call
-        with patch("common.basic.requests.get") as mock_get:
-            mock_response = MagicMock()
-            mock_response.text = "word1\nword2\nword3\n"
-            mock_get.return_value = mock_response
+        # Mock the requests call since function imports requests inside
+        mock_response = MagicMock()
+        mock_response.text = "word1\nword2\nword3\n"
+        mock_get.return_value = mock_response
 
-            words = basic.get_list_of_words()
-            assert isinstance(words, list)
-            assert len(words) > 0
+        words = basic.get_list_of_words()
+        assert isinstance(words, list)
+        assert len(words) > 0
+        mock_get.assert_called_once()

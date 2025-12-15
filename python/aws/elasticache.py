@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 retry_config = Config(retries={"max_attempts": 5, "mode": "standard"})
 
 
-class ElasticacheHandler:
+class ElastiCacheHandler:
     """
     Elasticache with AWS session management, error handling, and logging.
     """

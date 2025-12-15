@@ -66,20 +66,16 @@ source .venv/bin/activate
 python -c "import _utils; print(_utils.__version__)"
 ```
 
-## Optional Dependencies
+## All Dependencies Included
 
-The library is modular. You can install only what you need:
-
-```bash
-# AWS services only
-pip install boto3 botocore
-
-# Database operations only
-pip install SQLAlchemy psycopg[binary] asyncpg
-
-# Alpaca trading only
-pip install alpaca-trade-api pandas
-```
+All dependencies are installed by default when you install the package. This includes:
+- AWS services (boto3, botocore)
+- Database operations (SQLAlchemy, psycopg, asyncpg)
+- Alpaca trading APIs (alpaca-trade-api)
+- FastAPI support (fastapi, pydantic, uvicorn)
+- Machine learning utilities (numpy, pandas, scikit-learn)
+- Tableau integration (tableauserverclient)
+- Testing and development tools (pytest, ruff, mypy, etc.)
 
 ## Troubleshooting
 

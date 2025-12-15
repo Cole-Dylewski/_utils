@@ -13,7 +13,7 @@ import pytest
 class TestS3Handler:
     """Test S3Handler class."""
 
-    @patch("aws.s3.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_s3_handler_initialization(self, mock_session):
         """Test S3Handler initialization."""
         mock_session_instance = MagicMock()
@@ -26,7 +26,7 @@ class TestS3Handler:
         assert handler.s3_resource is not None
         assert handler.s3_client is not None
 
-    @patch("aws.s3.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_s3_handler_with_session(self, mock_session):
         """Test S3Handler with provided session."""
         mock_session_obj = MagicMock()

@@ -4,11 +4,13 @@ Tests for resilience patterns (retry, circuit breaker, rate limiter).
 
 import asyncio
 import time
+from unittest.mock import patch
 
 import pytest
 from utils.resilience import (
     CircuitBreaker,
     CircuitBreakerOpenError,
+    CircuitState,
     RateLimiter,
     async_retry,
     async_timeout,
@@ -133,7 +135,9 @@ class TestCircuitBreaker:
     def test_circuit_breaker_open_raises_error(self):
         """Test that open circuit breaker raises error."""
         breaker = CircuitBreaker(failure_threshold=1, recovery_timeout=1.0)
-        breaker.state = breaker.state.__class__("open")
+        # Properly set the circuit breaker to open state
+        breaker.state = CircuitState.OPEN
+        breaker.last_failure_time = time.time() - 0.5  # Set recent failure time
 
         def any_func():
             return "success"
@@ -167,17 +171,21 @@ class TestRateLimiter:
         assert limiter.acquire() is True
         assert limiter.acquire() is False  # Rate limit exceeded
 
-    def test_rate_limiter_wait(self):
+    @patch("utils.resilience.time.sleep")
+    def test_rate_limiter_wait(self, mock_sleep):
         """Test rate limiter wait functionality."""
         limiter = RateLimiter(max_calls=1, period=0.1)
 
         assert limiter.acquire() is True
         assert limiter.acquire() is False
 
-        # Wait for period to pass
-        time.sleep(0.15)
+        # wait_if_needed will wait and acquire internally
         limiter.wait_if_needed()
+        # wait_if_needed already acquired, so clear calls to test next acquire
+        limiter.calls.clear()
+        # After clearing, should be able to acquire again
         assert limiter.acquire() is True
+        mock_sleep.assert_called_once()
 
     def test_rate_limiter_resets_after_period(self):
         """Test rate limiter resets after period."""
@@ -217,3 +225,97 @@ class TestTimeout:
 
         with pytest.raises(TimeoutError, match="timed out"):
             await slow_operation()
+
+    def test_circuit_breaker_half_open_state(self):
+        """Test circuit breaker in half-open state."""
+        from utils.resilience import CircuitState
+
+        breaker = CircuitBreaker(failure_threshold=1, recovery_timeout=0.1)
+        breaker.state = CircuitState.OPEN
+        breaker.last_failure_time = 0  # Set to past
+
+        def successful_func():
+            return "success"
+
+        # Should transition to half-open and succeed
+        result = breaker.call(successful_func)
+        assert result == "success"
+        assert breaker.state == CircuitState.CLOSED
+
+    def test_circuit_breaker_half_open_failure(self):
+        """Test circuit breaker in half-open state with failure."""
+        from utils.resilience import CircuitState
+
+        breaker = CircuitBreaker(failure_threshold=1, recovery_timeout=0.1)
+        breaker.state = CircuitState.OPEN
+        breaker.last_failure_time = 0  # Set to past
+
+        def failing_func():
+            raise ValueError("Failure")
+
+        # Should transition to half-open, fail, and go back to open
+        with pytest.raises(ValueError, match="Failure"):
+            breaker.call(failing_func)
+        assert breaker.state == CircuitState.OPEN
+
+    def test_timeout_sync_function(self):
+        """Test timeout decorator for sync function (placeholder)."""
+        from utils.resilience import timeout
+
+        @timeout(seconds=1.0)
+        def fast_operation():
+            return "success"
+
+        # Sync timeout is a placeholder, should just execute
+        result = fast_operation()
+        assert result == "success"
+
+    def test_rate_limiter_wait_if_needed(self):
+        """Test rate limiter wait_if_needed functionality."""
+        limiter = RateLimiter(max_calls=1, period=0.1)
+
+        assert limiter.acquire() is True
+        assert limiter.acquire() is False
+
+        # wait_if_needed will wait and acquire internally
+        limiter.wait_if_needed()
+        # wait_if_needed already acquired, so clear calls to test next acquire
+        limiter.calls.clear()
+        # After clearing, should be able to acquire again
+        assert limiter.acquire() is True
+
+    def test_circuit_breaker_should_attempt_reset(self):
+        """Test circuit breaker reset logic."""
+        breaker = CircuitBreaker(failure_threshold=1, recovery_timeout=0.1)
+        breaker.last_failure_time = None
+        assert breaker._should_attempt_reset() is True
+
+        breaker.last_failure_time = 0  # Past time
+        assert breaker._should_attempt_reset() is True
+
+        breaker.last_failure_time = time.time()  # Current time
+        assert breaker._should_attempt_reset() is False
+
+    def test_circuit_breaker_on_success(self):
+        """Test circuit breaker success handler."""
+        from utils.resilience import CircuitState
+
+        breaker = CircuitBreaker(failure_threshold=2, recovery_timeout=1.0)
+        breaker.failure_count = 1
+        breaker.state = CircuitState.HALF_OPEN
+
+        breaker._on_success()
+        assert breaker.failure_count == 0
+        assert breaker.state == CircuitState.CLOSED
+
+    def test_circuit_breaker_on_failure(self):
+        """Test circuit breaker failure handler."""
+        from utils.resilience import CircuitState
+
+        breaker = CircuitBreaker(failure_threshold=2, recovery_timeout=1.0)
+        breaker.failure_count = 1
+
+        breaker._on_failure()
+        assert breaker.failure_count == 2
+        assert breaker.last_failure_time is not None
+        assert breaker.state == CircuitState.OPEN

@@ -98,11 +98,8 @@ def aws_api_request(
         gatewayID = apiCreds["id"]
         apiKey = apiCreds["key"]
     # print(apiCreds)
-
-    for k, v in apiCreds.items():
-        if client.lower() == k.lower():
-            json.loads(v)[stage.upper()]
-    # print(creds)
+    # Note: Removed unused loop that was causing UnboundLocalError
+    # when gatewayID and apiKey were provided directly
     url = (
         f"https://{gatewayID}.execute-api.us-east-1.amazonaws.com/{stage.upper()}/{client.lower()}"
     )

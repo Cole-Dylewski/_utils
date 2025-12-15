@@ -16,17 +16,15 @@ class TestEmailUtils:
         """Test that email module can be imported."""
         assert email is not None
 
-    @patch("utils.email.secrets.SecretHandler")
-    def test_send_email_with_secret(self, mock_secrets):
+    @patch("utils.email.secrets_handler")
+    def test_send_email_with_secret(self, mock_secrets_handler):
         """Test sending email with Secrets Manager."""
-        mock_secret_handler = MagicMock()
-        mock_secret_handler.get_secret.return_value = {
+        mock_secrets_handler.get_secret.return_value = {
             "username": "test@example.com",
             "password": "test-pass",
         }
-        mock_secrets.return_value = mock_secret_handler
 
-        with patch("utils.email.smtplib.SMTP") as mock_smtp:
+        with patch("smtplib.SMTP") as mock_smtp:
             mock_server = MagicMock()
             mock_smtp.return_value = mock_server
 

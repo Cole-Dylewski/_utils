@@ -14,7 +14,7 @@ class TestTeamsUtils:
 
     @patch("utils.teams.secrets_handler.get_secret")
     @patch("utils.teams.sql.run_sql")
-    @patch("utils.teams.requests.post")
+    @patch("requests.post")
     def test_send_teams_notification_basic(self, mock_post, mock_sql, mock_secret):
         """Test sending Teams notification without users."""
         mock_secret.return_value = {"channel1": "https://webhook.url"}
@@ -31,7 +31,7 @@ class TestTeamsUtils:
 
     @patch("utils.teams.secrets_handler.get_secret")
     @patch("utils.teams.sql.run_sql")
-    @patch("utils.teams.requests.post")
+    @patch("requests.post")
     def test_send_teams_notification_with_users(self, mock_post, mock_sql, mock_secret):
         """Test sending Teams notification with user mentions."""
         import pandas as pd
@@ -64,8 +64,10 @@ class TestTeamsUtils:
                 premsg="Test",
             )
 
-    def test_send_teams_notification_missing_directory_schema(self):
+    @patch("utils.teams.secrets_handler.get_secret")
+    def test_send_teams_notification_missing_directory_schema(self, mock_secret):
         """Test sending Teams notification with users but no directory schema raises error."""
+        mock_secret.return_value = {"channel1": "https://webhook.url"}
         with pytest.raises(ValueError, match="directory_schema parameter is required"):
             teams.send_teams_notification(
                 channel="channel1",

@@ -22,6 +22,11 @@ def test_coverage_requirements():
 
 
 # Coverage tracking checklist:
+# ✅ Completed:
+# - alpaca/trader_api/* modules (orders, portfolio, watchlists, history, assets, calendar, clock, crypto, data submodules)
+# - server_management/* modules (ansible, terraform) - comprehensive tests added
+# - utils/api.py - expanded test coverage
+
 # TODO: Add comprehensive tests for:
 # - aws/ecs.py
 # - aws/glue.py
@@ -31,9 +36,13 @@ def test_coverage_requirements():
 # - aws/elasticache.py
 # - aws/sns.py
 # - aws/cloudwatch.py
-# - alpaca/* modules
-# - server_management/* modules
 # - snowflake/* modules
 # - tableau/* modules
 # - sql/* modules
 # - utils/* remaining modules
+
+# Note: The following modules are empty/minimal and don't need tests:
+# - utils/azure.py (empty)
+# - common/models.py (empty)
+# - models/sql.py (empty)
+# - sql/models.py (empty)

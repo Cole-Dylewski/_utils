@@ -22,25 +22,16 @@ _utils is a modular utility package designed to streamline development across mu
 pip install _utils
 ```
 
-### Optional Dependencies
+### All Dependencies Included
 
-Install only the features you need:
-
-```bash
-# AWS services
-pip install _utils[aws]
-
-# Database operations
-pip install _utils[db]
-
-# Alpaca trading APIs
-pip install _utils[alpaca]
-
-# FastAPI support
-pip install _utils[fastapi]
-
-# Machine learning utilities
-pip install _utils[ml]
+All dependencies are installed by default. The package includes:
+- AWS services (boto3, botocore)
+- Database operations (SQLAlchemy, psycopg, asyncpg)
+- Alpaca trading APIs (alpaca-trade-api)
+- FastAPI support (fastapi, pydantic, uvicorn)
+- Machine learning utilities (numpy, pandas, scikit-learn)
+- Tableau integration (tableauserverclient)
+- Testing and development tools (pytest, ruff, mypy, etc.)
 
 # Tableau integration
 pip install _utils[tableau]

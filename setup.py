@@ -131,25 +131,34 @@ def upgrade_pip(venv_python: Path) -> bool:
 
 
 def install_package(venv_pip: Path) -> bool:
-    """Install package with all dependencies from requirements.txt."""
+    """Install package with all dependencies from requirements.txt or pyproject.toml."""
     print_status("Installing package with all dependencies...", "info")
 
-    # Check if requirements.txt exists
+    # First, try installing from requirements.txt if it exists
     if Path("requirements.txt").exists():
         returncode, _stdout, stderr = run_command(
             [str(venv_pip), "install", "-r", "requirements.txt"], check=False
         )
+        if returncode == 0:
+            # Also install package in editable mode to ensure it's available
+            returncode2, _stdout2, stderr2 = run_command(
+                [str(venv_pip), "install", "-e", "."], check=False
+            )
+            if returncode2 != 0:
+                print_status(f"Warning: Editable install failed: {stderr2}", "warning")
+        else:
+            print_status(f"Error installing from requirements.txt: {stderr}", "error")
+            return False
     else:
-        # Fallback to editable install with dev extras
+        # Fallback to editable install - all dependencies are now in base dependencies
         returncode, _stdout, stderr = run_command(
             [str(venv_pip), "install", "-e", "."], check=False
         )
+        if returncode != 0:
+            print_status(f"Error installing package: {stderr}", "error")
+            return False
 
-    if returncode != 0:
-        print_status(f"Error installing package: {stderr}", "error")
-        return False
-
-    print_status("[OK] Package installed", "success")
+    print_status("[OK] Package installed with all dependencies", "success")
     return True
 
 

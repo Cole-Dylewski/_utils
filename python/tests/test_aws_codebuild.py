@@ -13,7 +13,7 @@ import pytest
 class TestCodebuildHandler:
     """Test CodebuildHandler class."""
 
-    @patch("aws.codebuild.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_codebuild_handler_initialization(self, mock_session):
         """Test CodebuildHandler initialization."""
         mock_session_instance = MagicMock()
@@ -25,7 +25,7 @@ class TestCodebuildHandler:
         assert handler.codebuild_client is not None
         assert handler.logs_client is not None
 
-    @patch("aws.codebuild.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_codebuild_handler_with_session(self, mock_session):
         """Test CodebuildHandler with provided session."""
         mock_session_obj = MagicMock()
@@ -34,7 +34,7 @@ class TestCodebuildHandler:
         handler = CodebuildHandler(session=mock_session_obj)
         assert handler.session == mock_session_obj
 
-    @patch("aws.codebuild.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_get_project_config(self, mock_session):
         """Test getting CodeBuild project configuration."""
         mock_session_instance = MagicMock()
@@ -50,7 +50,7 @@ class TestCodebuildHandler:
         assert config is not None
         mock_codebuild_client.batch_get_projects.assert_called_once()
 
-    @patch("aws.codebuild.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_get_project_config_not_found(self, mock_session):
         """Test getting non-existent project raises error."""
         mock_session_instance = MagicMock()
@@ -63,7 +63,7 @@ class TestCodebuildHandler:
         with pytest.raises(ValueError, match="No project found"):
             handler.get_project_config("non-existent-project")
 
-    @patch("aws.codebuild.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_start_build(self, mock_session):
         """Test starting a CodeBuild project."""
         mock_session_instance = MagicMock()

@@ -13,7 +13,7 @@ import pytest
 class TestDynamoDBHandler:
     """Test DynamoDBHandler class."""
 
-    @patch("aws.dynamodb.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_dynamodb_handler_initialization(self, mock_session):
         """Test DynamoDBHandler initialization."""
         mock_session_instance = MagicMock()
@@ -43,7 +43,7 @@ class TestDynamoDBHandler:
         metadata = handler.get_table_metadata("test-table")
         assert metadata is not None
 
-    @patch("aws.dynamodb.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_get_table_metadata(self, mock_session):
         """Test getting table metadata."""
         mock_session_instance = MagicMock()
@@ -60,7 +60,7 @@ class TestDynamoDBHandler:
         assert "TableName" in metadata or metadata == {}
         mock_dynamodb_client.describe_table.assert_called_once()
 
-    @patch("aws.dynamodb.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_update_record(self, mock_session):
         """Test updating a record."""
         mock_session_instance = MagicMock()
@@ -75,7 +75,7 @@ class TestDynamoDBHandler:
         assert result is not None
         mock_table.update_item.assert_called_once()
 
-    @patch("aws.dynamodb.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_push_record(self, mock_session):
         """Test pushing a record."""
         mock_session_instance = MagicMock()

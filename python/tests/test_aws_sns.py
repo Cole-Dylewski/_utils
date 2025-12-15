@@ -13,7 +13,7 @@ import pytest
 class TestSNSHandler:
     """Test SNSHandler class."""
 
-    @patch("aws.sns.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_sns_handler_initialization(self, mock_session):
         """Test SNSHandler initialization."""
         mock_session_instance = MagicMock()
@@ -24,7 +24,7 @@ class TestSNSHandler:
         assert handler.session is not None
         assert handler.sns_client is not None
 
-    @patch("aws.sns.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_sns_handler_with_session(self, mock_session):
         """Test SNSHandler with provided session."""
         mock_session_obj = MagicMock()
@@ -33,7 +33,7 @@ class TestSNSHandler:
         handler = SNSHandler(session=mock_session_obj)
         assert handler.session == mock_session_obj
 
-    @patch("aws.sns.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_publish_message(self, mock_session):
         """Test publishing SNS message."""
         mock_session_instance = MagicMock()

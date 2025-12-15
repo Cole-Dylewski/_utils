@@ -13,7 +13,7 @@ import pytest
 class TestSecretHandler:
     """Test SecretHandler class."""
 
-    @patch("aws.secrets.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_secret_handler_initialization(self, mock_session):
         """Test SecretHandler initialization."""
         mock_session_instance = MagicMock()
@@ -24,7 +24,7 @@ class TestSecretHandler:
         assert handler.session is not None
         assert handler.secrets_client is not None
 
-    @patch("aws.secrets.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_secret_handler_with_session(self, mock_session):
         """Test SecretHandler with provided session."""
         mock_session_obj = MagicMock()

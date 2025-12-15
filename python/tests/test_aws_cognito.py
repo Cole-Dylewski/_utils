@@ -13,7 +13,7 @@ import pytest
 class TestCognitoHandler:
     """Test CognitoHandler class."""
 
-    @patch("aws.cognito.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_cognito_handler_initialization_with_credentials(self, mock_session):
         """Test CognitoHandler initialization with provided credentials."""
         mock_session_instance = MagicMock()
@@ -31,7 +31,7 @@ class TestCognitoHandler:
         assert handler.user_pool_id == "test-pool-id"
 
     @patch("aws.cognito.secrets.SecretHandler")
-    @patch("aws.cognito.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_cognito_handler_initialization_with_secret(self, mock_session, mock_secrets):
         """Test CognitoHandler initialization with Secrets Manager."""
         mock_secret_handler = MagicMock()
@@ -51,13 +51,13 @@ class TestCognitoHandler:
         assert handler.user_pool_id == "secret-pool-id"
         assert handler.region == "us-west-2"
 
-    @patch("aws.cognito.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_cognito_handler_initialization_missing_credentials(self, mock_session):
         """Test CognitoHandler initialization without credentials raises error."""
         with pytest.raises(ValueError, match="cognito_creds_secret_name parameter is required"):
             CognitoHandler()
 
-    @patch("aws.cognito.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_authenticate_user(self, mock_session):
         """Test user authentication."""
         mock_session_instance = MagicMock()
@@ -82,7 +82,7 @@ class TestCognitoHandler:
         assert "AccessToken" in result or "challenge_name" in result
         mock_cognito_client.initiate_auth.assert_called_once()
 
-    @patch("aws.cognito.boto3_session.Session")
+    @patch("aws.boto3_session.Session")
     def test_refresh_user_token(self, mock_session):
         """Test token refresh."""
         mock_session_instance = MagicMock()

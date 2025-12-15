@@ -108,7 +108,7 @@ def color_print(styles):
             styled_string += reset_code
         result += styled_string
 
-    # NOTE: Removed print statement - result may contain sensitive data
+    print(result)  # Print the styled result
 
 
 # Example Usage
