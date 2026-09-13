@@ -20,6 +20,7 @@ exclude = [
     "htmlcov",
     "coverage",
     "node_modules",
+    "README.md",
     "cheatsheet.ipynb",  # Exclude notebook from linting
 ]
 
@@ -62,6 +63,7 @@ select = [
 ignore = [
     "E501",  # line too long (handled by formatter)
     "PLR0913", # too many arguments
+    "PLR0917", # too many positional arguments
     "PLR2004", # magic value used in comparison
     "TRY003", # avoid specifying long messages outside exception class
     "EM101",  # exception must not use a string literal
