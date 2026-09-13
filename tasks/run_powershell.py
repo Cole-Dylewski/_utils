@@ -29,7 +29,14 @@ def build_shell_command(command: str, powershell_exe: Path = POWERSHELL_EXE) -> 
     ['/bin/sh', '-c', 'echo hello']
     """
     if powershell_exe.is_file():
-        return [str(powershell_exe), "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", command]
+        return [
+            str(powershell_exe),
+            "-NoLogo",
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            command,
+        ]
     return ["/bin/sh", "-c", command]
 
 
